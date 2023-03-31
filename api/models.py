@@ -11,12 +11,18 @@ class User(AbstractUser):
     is_artist = models.BooleanField(default=False)
     # profile_image = models.ImageField(upload_to='store/images', null=True, blank=True)
 
+    def __str__(self) -> str:
+        return f'{self.first_name} {self.last_name}'
+
 
 class Artist(models.Model):
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name='artist', primary_key=True)
 
     bio = models.TextField(blank=True)
+
+    def __str__(self) -> str:
+        return f'{self.user.first_name} '
 
 
 class Album(models.Model):
@@ -29,13 +35,20 @@ class Album(models.Model):
     duration = models.PositiveIntegerField(default=0)
     likes_count = models.PositiveIntegerField(default=0)
 
+    def __str__(self) -> str:
+        return f'{self.name} for artist {self.artist.user.first_name} '
+
 
 class LikedAlbum(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='favourite_albums')
+    name = models.CharField(max_length=255)
     album = models.ForeignKey(
         Album, on_delete=models.CASCADE, related_name='users_favourite_album')
     created_at = models.DateField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Track(models.Model):
@@ -49,6 +62,9 @@ class Track(models.Model):
     likes_count = models.IntegerField(default=0)
     # file = models.FileField(upload_to='store/images', null=True, blank=True)
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class LikedTrack(models.Model):
     user = models.ForeignKey(
@@ -56,6 +72,9 @@ class LikedTrack(models.Model):
     track = models.ForeignKey(
         Track, on_delete=models.CASCADE, related_name='users_favourite_track')
     created_at = models.DateField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return f'{self.user.first_name} like track {self.track.name}'
 
 
 class Playlist(models.Model):
@@ -69,6 +88,9 @@ class Playlist(models.Model):
     tracks = models.ManyToManyField(Track, related_name='playlists')
     created_at = models.DateField(auto_now_add=True)
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class LikedPlaylist(models.Model):
     user = models.ForeignKey(
@@ -77,6 +99,9 @@ class LikedPlaylist(models.Model):
         Playlist, on_delete=models.CASCADE, related_name='users_favourite_playlist')
     created_at = models.DateField(auto_now_add=True)
 
+    def __str__(self) -> str:
+        return f'{self.user.first_name} like playlist {self.playlist.name}'
+
 
 class RecentlyDeletedPlaylists(models.Model):
     playlist_id = models.IntegerField(primary_key=True)
@@ -84,10 +109,16 @@ class RecentlyDeletedPlaylists(models.Model):
     deleted_at = models.DateField(auto_now_add=True)
     # image = models.ImageField(upload_to='store/images', null=True, blank=True)
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
     playlists = models.ManyToManyField(Playlist, related_name='categories')
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Follower(models.Model):
@@ -97,6 +128,9 @@ class Follower(models.Model):
         User, on_delete=models.CASCADE, related_name='followers')
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self) -> str:
+        return f'{self.follower.first_name} follow {self.follower.last_name}'
+
 
 class Payment(models.Model):
     user = models.ForeignKey(
@@ -105,12 +139,18 @@ class Payment(models.Model):
     amount = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self) -> str:
+        return f'{self.user.first_name} make payment'
+
 
 class SubscriptionPlan(models.Model):
     name = models.CharField(max_length=255)
     price = models.PositiveIntegerField()
     description = models.TextField(blank=True)
     duration = models.IntegerField(default=1)
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class User_SubscriptionPlan(models.Model):
@@ -121,9 +161,15 @@ class User_SubscriptionPlan(models.Model):
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField(blank=True, null=True)
 
+    def __str__(self) -> str:
+        return f'{self.user.first_name} is on plan {self.plan.name}'
+
 
 class Notification(models.Model):
     reciever = models.ForeignKey(
         User, related_name='notifications', on_delete=models.CASCADE)
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return f'{self.reciever}  {self.message}'
