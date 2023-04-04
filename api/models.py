@@ -3,6 +3,10 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
     email = models.EmailField(unique=True)
     followers_count = models.PositiveIntegerField(default=0)
     birth_date = models.DateField(blank=True, null=True)
@@ -12,7 +16,7 @@ class User(AbstractUser):
     # profile_image = models.ImageField(upload_to='store/images', null=True, blank=True)
 
     def __str__(self) -> str:
-        return f'{self.first_name} {self.last_name}'
+        return f'{self.email}'
 
 
 class Artist(models.Model):
