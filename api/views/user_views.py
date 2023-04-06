@@ -63,6 +63,8 @@ class UserProfile(generics.GenericAPIView):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def checkout(request, plan_id):
+    if request.user.is_premium():
+        return Response({"message": "your are already a premium user"}, status=status.HTTP_406_NOT_ACCEPTABLE)
     try:
         plan = get_object_or_404(SubscriptionPlan, pk=plan_id)
         checkout_session = stripe.checkout.Session.create(
