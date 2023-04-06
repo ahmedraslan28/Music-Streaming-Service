@@ -60,43 +60,12 @@ class UserProfile(generics.GenericAPIView):
         return Response(serializer.data)
 
 
-# class checkout(APIView):
-#     permission_classes = [IsAuthenticated]
-
-#     def post(self, request, plan_id):
-#         stripe.api_key = settings.STRIPE_SECRET_KEY
-#         try:
-#             plan = get_object_or_404(SubscriptionPlan, pk=plan_id)
-#             product_id = settings.PRODUCT_KEY
-#             price = stripe.Price.create(
-#                 unit_amount=int(plan.price * 100),
-#                 currency='usd',
-#                 product=product_id,
-#                 recurring=None,
-#             )
-#             checkout_session = stripe.checkout.Session.create(
-#                 line_items=[
-#                     {
-#                         'price': price.id,
-#                         'quantity': 1,
-#                     },
-#                 ],
-#                 mode='payment',
-#                 success_url='http://127.0.0.1:8000/admin',
-#                 cancel_url='http://127.0.0.1:8000/admin',
-#             )
-#         except Exception as e:
-#             return Response({"message": f"{str(e)}"}, status=400)
-#         return redirect(checkout_session.url)
-
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def checkout(request, plan_id):
     try:
         plan = get_object_or_404(SubscriptionPlan, pk=plan_id)
         checkout_session = stripe.checkout.Session.create(
-            client_reference_id=request.user.id if request.user.is_authenticated else None,
             payment_method_types=['card'],
             line_items=[
                 {
