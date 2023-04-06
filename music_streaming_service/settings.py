@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "debug_toolbar",
     'rest_framework',
     'api.apps.ApiConfig',
     'auth.apps.AuthConfig',
@@ -51,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = 'music_streaming_service.urls'
@@ -115,6 +117,10 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=5),
 }
 
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
@@ -145,3 +151,9 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'api.User'
+
+
+# stripe settings
+STRIPE_PUBLIC_KEY = 'pk_test_51MtePDBTTGpHy5cV1hG6csEy9LluWimvLgcAhkwiFwjUT13JLpITEFRnJwrDVMCkC9PmsUPRgYEtX8Oy0UwgsPnj004M25DE7N'
+STRIPE_SECRET_KEY = 'sk_test_51MtePDBTTGpHy5cV68SknEtbb0AdWY8BFdolBP21id7dB3OoVI4uJ1usEOgWjCcdrZEuKx2cOFnVoTzlrdSeNZUQ00PE0vWD9Y'
+PRODUCT_KEY = 'prod_Nf18qFalCAhRFb'

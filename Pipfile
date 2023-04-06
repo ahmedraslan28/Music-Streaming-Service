@@ -7,6 +7,8 @@ name = "pypi"
 djangorestframework = "*"
 django = "*"
 djangorestframework-simplejwt = "*"
+stripe = "*"
+django-debug-toolbar = "*"
 
 [dev-packages]
 autopep8 = "*"

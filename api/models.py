@@ -149,7 +149,7 @@ class Payment(models.Model):
 
 class SubscriptionPlan(models.Model):
     name = models.CharField(max_length=255)
-    price = models.PositiveIntegerField()
+    price = models.DecimalField(max_digits=8, decimal_places=2)
     description = models.TextField(blank=True)
     duration = models.IntegerField(default=1)
 
