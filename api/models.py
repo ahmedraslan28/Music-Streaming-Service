@@ -35,7 +35,6 @@ class Album(models.Model):
         Artist, on_delete=models.CASCADE, related_name='Albums')
     name = models.CharField(max_length=255)
     release_date = models.DateField(auto_now_add=True)
-    # image = models.ImageField(upload_to='store/images', null=True, blank=True)
     song_count = models.PositiveIntegerField(default=0)
     duration = models.PositiveIntegerField(default=0)
     likes_count = models.PositiveIntegerField(default=0)
@@ -65,7 +64,7 @@ class Track(models.Model):
     duration = models.IntegerField(default=0)
     release_date = models.DateField(auto_now_add=True)
     likes_count = models.IntegerField(default=0)
-    # file = models.FileField(upload_to='store/images', null=True, blank=True)
+    track_file = models.ImageField(upload_to='tracks')
 
     def __str__(self) -> str:
         return self.name
@@ -89,7 +88,6 @@ class Playlist(models.Model):
     song_count = models.PositiveIntegerField(default=0)
     duration = models.PositiveIntegerField(default=0)
     likes_count = models.PositiveIntegerField(default=0)
-    # image = models.ImageField(upload_to='store/images', null=True, blank=True)
     tracks = models.ManyToManyField(Track, related_name='playlists')
     created_at = models.DateField(auto_now_add=True)
 
@@ -112,7 +110,6 @@ class RecentlyDeletedPlaylists(models.Model):
     playlist_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=100)
     deleted_at = models.DateField(auto_now_add=True)
-    # image = models.ImageField(upload_to='store/images', null=True, blank=True)
 
     def __str__(self) -> str:
         return self.name
