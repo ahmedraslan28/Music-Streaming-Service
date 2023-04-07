@@ -96,6 +96,7 @@ class EmailConfirm(APIView):
                     'is_admin': user.is_staff,
                     'is_artist': user.is_artist,
                     'is_premium': user.is_premium,
+                    'email': user.email
                 }
             })
         return Response({'error': 'Invalid activation URL.'})

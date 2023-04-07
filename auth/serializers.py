@@ -11,22 +11,24 @@ class LoginSerializer(serializers.Serializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    repeat_password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
     password = serializers.CharField(write_only=True)
+    profile_image = serializers.ImageField(max_length=None,
+                                           allow_empty_file=True, use_url=True)
 
     class Meta:
         model = User
         fields = ['id', 'email', 'username', 'first_name',
-                  'last_name', 'birth_date', 'is_male', 'is_artist', 'password', 'repeat_password']
+                  'last_name', 'birth_date', 'is_male', 'is_artist', 'password', 'confirm_password', 'profile_image']
 
     def validate(self, data):
-        if data['password'] != data['repeat_password']:
+        if data['password'] != data['confirm_password']:
             raise serializers.ValidationError("password do not match")
         return data
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        validated_data.pop('repeat_password')
+        validated_data.pop('confirm_password')
         user = User.objects.create(is_active=False, **validated_data)
         user.set_password(password)
         user.save()
