@@ -13,8 +13,6 @@ class LoginSerializer(serializers.Serializer):
 class RegisterSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True)
     password = serializers.CharField(write_only=True)
-    profile_image = serializers.ImageField(max_length=None,
-                                           allow_empty_file=True, use_url=True)
 
     class Meta:
         model = User

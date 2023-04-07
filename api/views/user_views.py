@@ -22,17 +22,17 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 # add permissions
 class UsersList(generics.ListAPIView):
     serializer_class = UserSerializer
-    queryset = User.objects.filter(is_artist=False)\
-        .values('first_name', 'last_name', 'username', 'followers_count',
-                'email', 'is_premium', 'is_male', 'birth_date')
+    queryset = User.objects.filter(is_artist=False, is_active=True)\
+        .only('profile_image', 'first_name', 'last_name', 'username', 'followers_count',
+              'email', 'is_premium', 'is_male', 'birth_date')
     # permission_classes = [IsAdminUser]
 
 
 class UsersDetail(generics.RetrieveAPIView):
     serializer_class = UserSerializer
-    queryset = User.objects.filter(is_artist=False)\
-        .values('first_name', 'last_name', 'username', 'followers_count',
-                'email', 'is_premium', 'is_male', 'birth_date')
+    queryset = User.objects.filter(is_artist=False, is_active=True)\
+        .only('first_name', 'last_name', 'username', 'followers_count',
+              'email', 'is_premium', 'is_male', 'birth_date', 'profile_image')
     lookup_field = 'id'
     permission_classes = [IsAuthenticated]
 
@@ -45,7 +45,7 @@ class UserProfile(generics.GenericAPIView):
     def get_queryset(self):
         if self.queryset is not None:
             return self.queryset
-        self.queryset = get_object_or_404(User, pk=self.request.user.id)
+        self.queryset = self.request.user
         return self.queryset
 
     def get(self, request):
