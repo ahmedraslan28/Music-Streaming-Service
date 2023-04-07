@@ -108,9 +108,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     'COERCE_DECIMAL_TO_STRING': False,
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    # 'DEFAULT_AUTHENTICATION_CLASSES': (
+    #     'rest_framework_simplejwt.authentication.JWTAuthentication',
+    # )
 }
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
@@ -157,3 +157,4 @@ AUTH_USER_MODEL = 'api.User'
 STRIPE_PUBLIC_KEY = 'pk_test_51MtePDBTTGpHy5cV1hG6csEy9LluWimvLgcAhkwiFwjUT13JLpITEFRnJwrDVMCkC9PmsUPRgYEtX8Oy0UwgsPnj004M25DE7N'
 STRIPE_SECRET_KEY = 'sk_test_51MtePDBTTGpHy5cV68SknEtbb0AdWY8BFdolBP21id7dB3OoVI4uJ1usEOgWjCcdrZEuKx2cOFnVoTzlrdSeNZUQ00PE0vWD9Y'
 PRODUCT_KEY = 'prod_Nf18qFalCAhRFb'
+STRIPE_WEBHOOK_KEY = 'whsec_efa5aa7746760b7f421d3000195b53e06b15ad3c8d28f348bc1385ddb81fdef3'

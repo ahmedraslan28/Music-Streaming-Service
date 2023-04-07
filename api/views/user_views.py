@@ -1,22 +1,19 @@
-from django.contrib.auth.decorators import login_required
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+from django.conf import settings
+from django.utils import timezone
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth import get_user_model
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse, HttpResponseRedirect
-from django.conf import settings
-from django.urls import reverse
 
 import stripe
 
 from ..serializers import UserSerializer
-from ..models import SubscriptionPlan
+from ..models import (SubscriptionPlan, User_SubscriptionPlan)
 
 User = get_user_model()
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -25,13 +22,17 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 # add permissions
 class UsersList(generics.ListAPIView):
     serializer_class = UserSerializer
-    queryset = User.objects.filter(is_artist=False)
+    queryset = User.objects.filter(is_artist=False)\
+        .values('first_name', 'last_name', 'username', 'followers_count',
+                'email', 'is_premium', 'is_male', 'birth_date')
     # permission_classes = [IsAdminUser]
 
 
 class UsersDetail(generics.RetrieveAPIView):
     serializer_class = UserSerializer
-    queryset = User.objects.filter(is_artist=False)
+    queryset = User.objects.filter(is_artist=False)\
+        .values('first_name', 'last_name', 'username', 'followers_count',
+                'email', 'is_premium', 'is_male', 'birth_date')
     lookup_field = 'id'
     permission_classes = [IsAuthenticated]
 
@@ -63,7 +64,7 @@ class UserProfile(generics.GenericAPIView):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def checkout(request, plan_id):
-    if request.user.is_premium():
+    if request.user.is_premium:
         return Response({"message": "your are already a premium user"}, status=status.HTTP_406_NOT_ACCEPTABLE)
     try:
         plan = get_object_or_404(SubscriptionPlan, pk=plan_id)
@@ -81,9 +82,13 @@ def checkout(request, plan_id):
                     'quantity': 1
                 }
             ],
+            metadata={
+                "user": request.user.id,
+                "plan": plan.id
+            },
             mode='payment',
-            success_url='http://127.0.0.1:8000/admin',
-            cancel_url='http://127.0.0.1:8000/admin',
+            success_url='http://127.0.0.1:8000/api/users/upgrade/success/',
+            cancel_url='http://127.0.0.1:8000/api/users/upgrade/cancel/',
         )
     except Exception as e:
         return Response({"message": f"{str(e)}"}, status=400)
@@ -91,20 +96,46 @@ def checkout(request, plan_id):
     return redirect(checkout_session.url)
 
 
-def success(request, plan_id):
-    plan = get_object_or_404(SubscriptionPlan, pk=plan_id)
-    message = {
-        "message": "congratulations your account upgraded successfuly",
-        "plan name": f"{plan.name}",
-        "features": f"{plan.description}"
-    }
-
-    return Response(message, status=200)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def success(request):
+    return Response({"message": "congratulations your account upgraded successfuly"}, status=200)
 
 
-def failed(request, plan_id):
-    message = {
-        "message": "the payment failed please try again",
-    }
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def cancel(request):
+    return Response({"message": "the payment canceled successfuly"}, status=200)
 
-    return Response(message, status=status.HTTP_400_BAD_REQUEST)
+
+@csrf_exempt
+@api_view(['POST'])
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    event = None
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, settings.STRIPE_WEBHOOK_KEY
+        )
+    except ValueError as e:
+        # Invalid payload
+        return Response(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        return Response(status=400)
+
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        user_id = session['metadata']['user']
+        plan_id = session['metadata']['plan']
+        user = User.objects.get(pk=user_id)
+        user.is_premium = True
+        user.save()
+
+        end_date = timezone.now() + timezone.timedelta(days=30)
+        User_SubscriptionPlan.objects.create(
+            user_id=user_id, plan_id=plan_id, end_date=end_date)
+
+    return Response(status=200)
