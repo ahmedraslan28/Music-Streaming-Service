@@ -13,7 +13,8 @@ class User(AbstractUser):
     is_male = models.BooleanField(default=True)
     is_premium = models.BooleanField(default=False)
     is_artist = models.BooleanField(default=False)
-    # profile_image = models.ImageField(upload_to='store/images', null=True, blank=True)
+    profile_image = models.ImageField(
+        upload_to='images/users_images', null=True, blank=True)
 
     def __str__(self) -> str:
         return f'{self.email}'

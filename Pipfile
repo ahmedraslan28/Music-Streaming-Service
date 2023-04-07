@@ -9,6 +9,7 @@ django = "*"
 djangorestframework-simplejwt = "*"
 stripe = "*"
 django-debug-toolbar = "*"
+pillow = "*"
 
 [dev-packages]
 autopep8 = "*"
