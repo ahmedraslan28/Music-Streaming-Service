@@ -75,18 +75,6 @@ class Track(models.Model):
     def __str__(self) -> str:
         return self.name
 
-    def save(self, time=0, *args, **kwargs):
-        if time <= 1:
-            super(Track, self).save(*args, **kwargs)
-            audio = MP3(self.audio_file.path)
-            self.duration = audio.info.length
-            self.save(time=time+1)
-
-    @property
-    def duration_in_minute(self):
-        duration = self.duration
-        return duration // 60, duration % 60
-
 
 class LikedTrack(models.Model):
     user = models.ForeignKey(
