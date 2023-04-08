@@ -10,6 +10,8 @@ djangorestframework-simplejwt = "*"
 stripe = "*"
 django-debug-toolbar = "*"
 pillow = "*"
+mutagen = "*"
+pydub = "*"
 
 [dev-packages]
 autopep8 = "*"

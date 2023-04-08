@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "414e134901b9dea182e55e0bf9bca00c2806d43689f5802758f41ff117d4dde6"
+            "sha256": "dfedc5712ad018b6bbfaea9ccc755b24e6239592c7a265f843e9f5065dc58ebc"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -154,6 +154,14 @@
             "markers": "python_version >= '3.5'",
             "version": "==3.4"
         },
+        "mutagen": {
+            "hashes": [
+                "sha256:6e5f8ba84836b99fe60be5fb27f84be4ad919bbb6b49caa6ae81e70584b55e58",
+                "sha256:8af0728aa2d5c3ee5a727e28d0627966641fddfe804c23eabb5926a4d770aed5"
+            ],
+            "index": "pypi",
+            "version": "==1.46.0"
+        },
         "pillow": {
             "hashes": [
                 "sha256:07999f5834bdc404c442146942a2ecadd1cb6292f5229f4ed3b31e0a108746b1",
@@ -225,6 +233,14 @@
             ],
             "index": "pypi",
             "version": "==9.5.0"
+        },
+        "pydub": {
+            "hashes": [
+                "sha256:65617e33033874b59d87db603aa1ed450633288aefead953b30bded59cb599a6",
+                "sha256:980a33ce9949cab2a569606b65674d748ecbca4f0796887fd6f46173a7b0d30f"
+            ],
+            "index": "pypi",
+            "version": "==0.25.1"
         },
         "pyjwt": {
             "hashes": [

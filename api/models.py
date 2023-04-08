@@ -1,5 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import FileExtensionValidator
+
+
+from mutagen.mp3 import MP3
 
 
 class User(AbstractUser):
@@ -27,7 +31,7 @@ class Artist(models.Model):
     bio = models.TextField(blank=True)
 
     def __str__(self) -> str:
-        return f'{self.user.first_name} '
+        return f'{self.user.email} '
 
 
 class Album(models.Model):
@@ -57,17 +61,31 @@ class LikedAlbum(models.Model):
 
 class Track(models.Model):
     album = models.ForeignKey(
-        Album, on_delete=models.CASCADE, related_name='tracks')
+        Album, on_delete=models.CASCADE, related_name='tracks', null=True, blank=True)
     artist = models.ForeignKey(
         Artist, on_delete=models.CASCADE, related_name='tracks')
     name = models.CharField(max_length=255)
     duration = models.IntegerField(default=0)
     release_date = models.DateField(auto_now_add=True)
     likes_count = models.IntegerField(default=0)
-    track_file = models.ImageField(upload_to='tracks')
+    audio_file = models.FileField(upload_to='tracks/', validators=[
+        FileExtensionValidator(allowed_extensions=['mp3'])
+    ])
 
     def __str__(self) -> str:
         return self.name
+
+    def save(self, time=0, *args, **kwargs):
+        if time <= 1:
+            super(Track, self).save(*args, **kwargs)
+            audio = MP3(self.audio_file.path)
+            self.duration = audio.info.length
+            self.save(time=time+1)
+
+    @property
+    def duration_in_minute(self):
+        duration = self.duration
+        return duration // 60, duration % 60
 
 
 class LikedTrack(models.Model):
