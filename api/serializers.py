@@ -49,3 +49,10 @@ class TrackSerializer(serializers.ModelSerializer):
         request = self.context['request']
 
         return super().save(artist=user.artist, **self.validated_data)
+
+
+class AlbumSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Album
+        fields = ['id', 'artist', 'name',
+                  'release_date', 'song_count', 'duration', 'likes_count']

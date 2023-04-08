@@ -3,9 +3,6 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import FileExtensionValidator
 
 
-from mutagen.mp3 import MP3
-
-
 class User(AbstractUser):
 
     USERNAME_FIELD = 'email'
@@ -61,7 +58,7 @@ class LikedAlbum(models.Model):
 
 class Track(models.Model):
     album = models.ForeignKey(
-        Album, on_delete=models.CASCADE, related_name='tracks', null=True, blank=True)
+        Album, on_delete=models.SET_NULL, related_name='tracks', null=True, blank=True)
     artist = models.ForeignKey(
         Artist, on_delete=models.CASCADE, related_name='tracks')
     name = models.CharField(max_length=255)
