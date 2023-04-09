@@ -9,9 +9,12 @@ User = get_user_model()
 
 
 class PlaylistSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Playlist
-        fields = []
+        fields = ['name', 'user_id', 'is_public', 'created_at',
+                  'song_count', 'duration', 'likes_count', 'tracks']
 
 
 class UserSerializer(serializers.ModelSerializer):
