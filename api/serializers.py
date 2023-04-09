@@ -8,15 +8,6 @@ from .models import *
 User = get_user_model()
 
 
-class PlaylistSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model = Playlist
-        fields = ['name', 'user_id', 'is_public', 'created_at',
-                  'song_count', 'duration', 'likes_count', 'tracks']
-
-
 class UserSerializer(serializers.ModelSerializer):
     # to add userplaylists and user followers and following and add following count
 
@@ -105,3 +96,23 @@ class AlbumTrackSerializer(serializers.Serializer):
         track.save()
         album.save()
         return track
+
+
+class PlaylistSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(read_only=True)
+    tracks = TrackSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Playlist
+        fields = ['name', 'user_id', 'is_public', 'created_at',
+                  'song_count', 'duration', 'likes_count', 'tracks']
+
+
+class PlaylistCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Playlist
+        fields = ['name', 'is_public']
+
+    def save(self, **kwargs):
+        user = self.context['user']
+        return super().save(user=user, **kwargs)

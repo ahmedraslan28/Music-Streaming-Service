@@ -93,7 +93,7 @@ class Playlist(models.Model):
     likes_count = models.PositiveIntegerField(default=0)
     is_public = models.BooleanField(default=True)
     tracks = models.ManyToManyField(
-        Track, related_name='playlists', null=True, blank=True)
+        Track, related_name='playlists', blank=True)
     created_at = models.DateField(auto_now_add=True)
 
     def __str__(self) -> str:
