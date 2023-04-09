@@ -1,16 +1,17 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, status
-from rest_framework.permissions import (IsAuthenticated)
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
-
 from django.conf import settings
 from django.contrib.auth import authenticate, login, get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
+
+
+from rest_framework import generics, status
+from rest_framework.permissions import (IsAuthenticated)
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 from . import serializers
@@ -69,7 +70,7 @@ class Register(generics.CreateAPIView):
         return Response({
             'success': 'if the email exist the confirmation Email will sent to the specified email address',
             "message": "Token sent to email!"
-        })
+        }, status=200)
 
 
 class EmailConfirm(APIView):
@@ -84,10 +85,9 @@ class EmailConfirm(APIView):
         if user is not None and default_token_generator.check_token(user, token):
             user.is_active = True
             user.save()
-            message = ""
             refresh = RefreshToken.for_user(user)
             return Response({
-                "message": message + "successfully activated",
+                "message": "successfully activated",
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
                 'data': {
@@ -99,7 +99,7 @@ class EmailConfirm(APIView):
                     'email': user.email
                 }
             })
-        return Response({'error': 'Invalid activation URL.'})
+        return Response({'error': 'Invalid activation URL.'}, status=400)
 
 
 class ForgotPassword(generics.CreateAPIView):
@@ -127,7 +127,7 @@ class ForgotPassword(generics.CreateAPIView):
         return Response({
             'success': 'if the email exist the Password reset Email will sent to the specified email address',
             "message": "Token sent to email!"
-        })
+        }, status=200)
 
 
 class ResetPassword(generics.CreateAPIView):
@@ -144,8 +144,8 @@ class ResetPassword(generics.CreateAPIView):
         if user is not None and default_token_generator.check_token(user, token):
             user.set_password(serializer.validated_data['password'])
             user.save()
-            return Response({'success': 'Password has been reset.'})
-        return Response({'error': 'Invalid reset URL.'})
+            return Response({'success': 'Password has been reset.'}, status=200)
+        return Response({'error': 'Invalid reset URL.'}, status=400)
 
 
 class UpdatePassword(generics.GenericAPIView):
@@ -170,4 +170,4 @@ class UpdatePassword(generics.GenericAPIView):
         return Response({
             "message": "password reseted successfuly",
             "token": str(refresh.access_token)
-        })
+        }, status=200)

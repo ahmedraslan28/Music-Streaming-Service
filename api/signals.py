@@ -2,7 +2,6 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-
 from api.models import Artist, Track
 
 from mutagen.mp3 import MP3

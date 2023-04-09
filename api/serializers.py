@@ -1,7 +1,7 @@
-from rest_framework.serializers import Serializer
-from rest_framework import serializers
 
 from django.contrib.auth import get_user_model
+
+from rest_framework import serializers
 
 from .models import *
 
@@ -27,6 +27,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 class TrackSerializer(serializers.ModelSerializer):
     duration_minutes = serializers.SerializerMethodField()
+    artist_id = serializers.IntegerField(read_only=True)
+    album_id = serializers.IntegerField(default=None)
 
     def get_duration_minutes(self, obj):
         duration_seconds = obj.duration
@@ -38,10 +40,10 @@ class TrackSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Track
-        fields = ['id', 'artist', 'name', 'duration', 'duration_minutes',
-                  'release_date', 'likes_count', 'audio_file', 'album',]
+        fields = ['id', 'artist_id', 'name', 'duration', 'duration_minutes',
+                  'release_date', 'likes_count', 'audio_file', 'album_id',]
 
-        read_only_fields = ('artist', 'duration',
+        read_only_fields = ('duration',
                             'release_date', 'likes_count', 'duration_minutes')
 
     def save(self, **kwargs):
@@ -51,8 +53,52 @@ class TrackSerializer(serializers.ModelSerializer):
         return super().save(artist=user.artist, **self.validated_data)
 
 
+class TrackUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Track
+        fields = ['name', 'album_id']
+
+
 class AlbumSerializer(serializers.ModelSerializer):
+    tracks = TrackSerializer(many=True, read_only=True)
+
     class Meta:
         model = Album
         fields = ['id', 'artist', 'name',
-                  'release_date', 'song_count', 'duration', 'likes_count']
+                  'release_date', 'song_count', 'duration',
+                  'likes_count', 'tracks']
+
+        read_only_fields = ['artist', 'song_count', 'duration', 'likes_count']
+
+    def save(self, **kwargs):
+        user = self.context['user']
+
+        return super().save(artist=user.artist, **self.validated_data)
+
+
+class AlbumTrackSerializer(serializers.Serializer):
+    track_id = serializers.IntegerField()
+
+    def validate(self, attrs):
+        track = Track.objects.filter(pk=attrs['track_id'])
+        if not track.exists():
+            raise serializers.ValidationError(
+                'No Track with given ID was found.')
+
+        if track[0].album is not None:
+            raise serializers.ValidationError(
+                'the track already belong to an album.')
+
+        return super().validate(attrs)
+
+    def save(self, **kwargs):
+        validated_data = {**self.validated_data}
+        album_id = self.context['album_id']
+        track = Track.objects.get(pk=validated_data['track_id'])
+        album = Album.objects.get(pk=album_id)
+        album.duration += track.duration
+        album.song_count += 1
+        track.album_id = album_id
+        track.save()
+        album.save()
+        return track

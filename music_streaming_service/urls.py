@@ -24,5 +24,6 @@ urlpatterns = [
     path('api/auth/', include('auth.urls')),
     path('api/users/', include('api.urls.user_urls')),
     path('api/tracks/', include('api.urls.track_urls')),
+    path('api/albums/', include('api.urls.album_urls')),
     path('api-auth/', include('rest_framework.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
