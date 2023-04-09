@@ -23,3 +23,17 @@ class PlaylistList(generics.ListCreateAPIView):
         obj = serializer.save()
         serializer = PlaylistSerializer(obj)
         return Response(serializer.data)
+
+
+class PlaulistDetail(generics.RetrieveUpdateDestroyAPIView):
+    def get_serializer_class(self):
+        if self.request.method == 'PUT' or self.request.method == 'PATCH':
+            return PlaylistCreateSerializer
+
+        return PlaylistSerializer
+
+    def get_serializer_context(self):
+        return {"user": self.request.user}
+
+    lookup_field = 'id'
+    queryset = Playlist.objects.prefetch_related('tracks').all()
