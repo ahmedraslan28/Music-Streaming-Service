@@ -25,7 +25,7 @@ class PlaylistList(generics.ListCreateAPIView):
         return Response(serializer.data)
 
 
-class PlaulistDetail(generics.RetrieveUpdateDestroyAPIView):
+class PlaylistDetail(generics.RetrieveUpdateDestroyAPIView):
     def get_serializer_class(self):
         if self.request.method == 'PUT' or self.request.method == 'PATCH':
             return PlaylistCreateSerializer
