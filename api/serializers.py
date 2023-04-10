@@ -116,3 +116,30 @@ class PlaylistCreateSerializer(serializers.ModelSerializer):
     def save(self, **kwargs):
         user = self.context['user']
         return super().save(user=user, **kwargs)
+
+
+class PlaylistTrackSerializer(serializers.Serializer):
+    track_id = serializers.IntegerField()
+
+    def validate(self, attrs):
+        track = Track.objects.filter(pk=attrs['track_id'])
+        playlist_id = self.context['playlist_id']
+        if Playlist.objects.filter(tracks=track[0]).exists():
+            raise serializers.ValidationError(
+                'The Track already belong to this playlist.')
+        if not track.exists():
+            raise serializers.ValidationError(
+                'No Track with given ID was found.')
+
+        return super().validate(attrs)
+
+    def save(self, **kwargs):
+        validated_data = {**self.validated_data}
+        playlist_id = self.context['playlist_id']
+        playlist = Playlist.objects.get(pk=playlist_id)
+        track = Track.objects.get(pk=validated_data['track_id'])
+        playlist.tracks.add(track)
+        playlist.duration += track.duration
+        playlist.song_count += 1
+        playlist.save()
+        return track

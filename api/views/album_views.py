@@ -1,3 +1,4 @@
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 
 
@@ -35,8 +36,10 @@ class AlbumTracks(generics.ListCreateAPIView):
         if self.queryset is not None:
             return self.queryset
         id = self.kwargs['id']
-        self.queryset = Track.objects.filter(album_id=id)
-        return self.queryset
+        if Album.objects.filter(pk=id).exists():
+            self.queryset = Track.objects.filter(album_id=id)
+            return self.queryset
+        raise Http404
 
     def post(self, request, *args, **kwargs):
         context = {"album_id": self.kwargs['id']}
