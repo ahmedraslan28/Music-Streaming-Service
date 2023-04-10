@@ -145,8 +145,13 @@ class PlaylistTrackSerializer(serializers.Serializer):
         return track
 
 
-class CategoriesList(serializers.ModelSerializer):
-    Playlists = PlaylistSerializer(many=True, read_only=True)
+class CategorySerializer(serializers.ModelSerializer):
+    playlists = serializers.HyperlinkedRelatedField(
+        many=True,
+        read_only=True,
+        view_name='playlist_details',
+        lookup_field='id'
+    )
 
     class Meta:
         model = Category
