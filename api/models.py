@@ -122,7 +122,8 @@ class RecentlyDeletedPlaylists(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
-    playlists = models.ManyToManyField(Playlist, related_name='categories')
+    playlists = models.ManyToManyField(
+        Playlist, related_name='categories', blank=True)
 
     def __str__(self) -> str:
         return self.name
