@@ -114,6 +114,9 @@ class LikedPlaylist(models.Model):
 class RecentlyDeletedPlaylists(models.Model):
     playlist_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=100)
+    likes_count = models.PositiveIntegerField(default=0)
+    is_public = models.BooleanField(default=True)
+    created_at = models.DateField()
     deleted_at = models.DateField(auto_now_add=True)
 
     def __str__(self) -> str:
