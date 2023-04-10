@@ -143,3 +143,11 @@ class PlaylistTrackSerializer(serializers.Serializer):
         playlist.song_count += 1
         playlist.save()
         return track
+
+
+class CategoriesList(serializers.ModelSerializer):
+    Playlists = PlaylistSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'playlists']
