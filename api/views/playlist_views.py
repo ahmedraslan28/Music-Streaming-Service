@@ -9,7 +9,7 @@ from ..serializers import (PlaylistSerializer,
                            PlaylistTrackSerializer,
                            TrackSerializer,
                            TrackUpdateSerializer, )
-from ..models import Playlist, Track
+from ..models import Playlist, Track, RecentlyDeletedPlaylists
 
 
 class PlaylistList(generics.ListCreateAPIView):
@@ -42,6 +42,19 @@ class PlaylistDetail(generics.RetrieveUpdateDestroyAPIView):
 
     lookup_field = 'id'
     queryset = Playlist.objects.prefetch_related('tracks').all()
+
+    def delete(self, request, id, *args, **kwargs):
+        obj = self.get_queryset().filter(pk=id)[0]
+        RecentlyDeletedPlaylists.objects.create(
+            playlist_id=id,
+            name=obj.name,
+            likes_count=obj.likes_count,
+            is_public=obj.is_public,
+            created_at=obj.created_at
+        )
+        obj.delete()
+        message = """playlist deleted successfully, you can restore it within 30 days."""
+        return Response(message, status=204)
 
 
 class PlaylistTracks(generics.ListCreateAPIView):
