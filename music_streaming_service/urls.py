@@ -27,5 +27,6 @@ urlpatterns = [
     path('api/albums/', include('api.urls.album_urls')),
     path('api/playlists/', include('api.urls.playlist_urls')),
     path('api/categories/', include('api.urls.category_urls')),
+    path('api/subscription_plans/', include('api.urls.subscription_plans_urls')),
     path('api-auth/', include('rest_framework.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
