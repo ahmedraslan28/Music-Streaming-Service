@@ -26,11 +26,16 @@ class TrackSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         album_id = attrs['album_id']
-        artist_id = self.context['user'].id
+        artist = self.context['user']
 
-        if album_id is not None and album_id != artist_id:
+        if album_id and not Album.objects.filter(pk=album_id).exists():
+            raise serializers.ValidationError(
+                "the album doesn't exist!")
+
+        if album_id and Album.objects.get(pk=album_id).artist.user != artist:
             raise serializers.ValidationError(
                 "the album don't belong to this artist")
+
         return super().validate(attrs)
 
     def get_duration_minutes(self, obj):
@@ -61,13 +66,11 @@ class TrackUpdateSerializer(serializers.ModelSerializer):
         album_id = attrs['album_id']
         artist = self.context['user']
 
-        if not Album.objects.filter(pk=album_id).exists():
+        if album_id and not Album.objects.filter(pk=album_id).exists():
             raise serializers.ValidationError(
                 "the album doesn't exist!")
 
-        album = Album.objects.get(pk=album_id)
-
-        if album_id is not None and album.artist.user != artist:
+        if album_id and Album.objects.get(pk=album_id).artist.user != artist:
             raise serializers.ValidationError(
                 "the album don't belong to this artist")
 
