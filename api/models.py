@@ -33,7 +33,7 @@ class Artist(models.Model):
 
 class Album(models.Model):
     artist = models.ForeignKey(
-        Artist, on_delete=models.CASCADE, related_name='Albums')
+        Artist, on_delete=models.CASCADE, related_name='albums')
     name = models.CharField(max_length=255)
     release_date = models.DateField(auto_now_add=True)
     song_count = models.PositiveIntegerField(default=0)

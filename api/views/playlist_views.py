@@ -54,7 +54,7 @@ class PlaylistDetail(generics.RetrieveUpdateDestroyAPIView):
         )
         obj.delete()
         message = """playlist deleted successfully, you can restore it within 30 days."""
-        return Response(message, status=204)
+        return Response({"message": message}, status=204)
 
 
 class PlaylistTracks(generics.ListCreateAPIView):

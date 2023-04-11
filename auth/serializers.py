@@ -80,5 +80,4 @@ class UpdatePasswordSerializer(serializers.Serializer):
         new_password = validated_data.pop('new_password')
         repeat_password = validated_data.pop('confirm_new_password')
         instance.set_password(new_password)
-        print("instance is ", instance)
         return instance

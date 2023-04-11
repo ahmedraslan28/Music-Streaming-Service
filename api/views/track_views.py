@@ -15,6 +15,9 @@ class TrackCreate(generics.ListCreateAPIView):
 
 class TrackDetail(generics.RetrieveUpdateDestroyAPIView):
 
+    def get_serializer_context(self):
+        return {"user": self.request.user, "request": self.request}
+
     def get_serializer_class(self):
         if self.request.method == 'PATCH' or self.request.method == 'PUT':
             return TrackUpdateSerializer

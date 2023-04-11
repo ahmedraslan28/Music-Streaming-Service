@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name',
-                  'username', 'email', 'is_premium', 'is_male', 'followers_count', 'birth_date', 'profile_image']
+                  'username', 'email', 'is_premium', 'is_male', 'is_active', 'is_artist', 'followers_count', 'birth_date', 'profile_image']
         read_only_fields = ('is_premium', 'followers_count')
         write_only_fields = ('birth_date')
 
@@ -24,12 +24,19 @@ class TrackSerializer(serializers.ModelSerializer):
     artist_id = serializers.IntegerField(read_only=True)
     album_id = serializers.IntegerField(default=None)
 
+    def validate(self, attrs):
+        album_id = attrs['album_id']
+        artist_id = self.context['user'].id
+
+        if album_id is not None and album_id != artist_id:
+            raise serializers.ValidationError(
+                "the album don't belong to this artist")
+        return super().validate(attrs)
+
     def get_duration_minutes(self, obj):
         duration_seconds = obj.duration
         duration_minutes = duration_seconds // 60
         duration_seconds_remainder = duration_seconds % 60
-        if duration_seconds_remainder < 10:
-            duration_seconds_remainder = '0' + str(duration_seconds_remainder)
         return f"{duration_minutes}:{duration_seconds_remainder}"
 
     class Meta:
@@ -48,6 +55,24 @@ class TrackSerializer(serializers.ModelSerializer):
 
 
 class TrackUpdateSerializer(serializers.ModelSerializer):
+    album_id = serializers.IntegerField()
+
+    def validate(self, attrs):
+        album_id = attrs['album_id']
+        artist = self.context['user']
+
+        if not Album.objects.filter(pk=album_id).exists():
+            raise serializers.ValidationError(
+                "the album doesn't exist!")
+
+        album = Album.objects.get(pk=album_id)
+
+        if album_id is not None and album.artist.user != artist:
+            raise serializers.ValidationError(
+                "the album don't belong to this artist")
+
+        return super().validate(attrs)
+
     class Meta:
         model = Track
         fields = ['name', 'album_id']
@@ -162,3 +187,14 @@ class SubscriptionPlanSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubscriptionPlan
         fields = ['id', 'name', 'price', 'description']
+
+
+class ArtistSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    user_id = serializers.IntegerField()
+    tracks = TrackSerializer(many=True, read_only=True)
+    albums = AlbumSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Artist
+        fields = ['user_id', 'bio', 'user', 'tracks', 'albums']
