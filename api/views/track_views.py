@@ -5,7 +5,7 @@ from ..models import Track
 from ..serializers import TrackSerializer, TrackUpdateSerializer
 
 
-class TrackCreate(generics.ListCreateAPIView):
+class TrackList(generics.ListCreateAPIView):
     serializer_class = TrackSerializer
     queryset = Track.objects.all()
 

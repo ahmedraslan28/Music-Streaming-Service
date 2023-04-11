@@ -193,10 +193,22 @@ class SubscriptionPlanSerializer(serializers.ModelSerializer):
 
 
 class ArtistSerializer(serializers.ModelSerializer):
+    tracks = serializers.HyperlinkedRelatedField(
+        many=True,
+        read_only=True,
+        view_name='track_details',
+        lookup_field='id'
+    )
+    albums = serializers.HyperlinkedRelatedField(
+        many=True,
+        read_only=True,
+        view_name='album_detail',
+        lookup_field='id'
+    )
     user = UserSerializer(read_only=True)
     user_id = serializers.IntegerField()
-    tracks = TrackSerializer(many=True, read_only=True)
-    albums = AlbumSerializer(many=True, read_only=True)
+    # tracks = TrackSerializer(many=True, read_only=True)
+    # albums = AlbumSerializer(many=True, read_only=True)
 
     class Meta:
         model = Artist

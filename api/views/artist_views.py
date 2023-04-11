@@ -3,8 +3,9 @@ from django.http import Http404
 from rest_framework import generics
 from rest_framework.response import Response
 
-from ..serializers import ArtistSerializer, TrackSerializer, TrackUpdateSerializer
-from ..models import Artist, Track
+from ..serializers import (
+    ArtistSerializer, TrackSerializer, TrackUpdateSerializer, AlbumSerializer)
+from ..models import Artist, Track, Album
 
 
 class ArtistList(generics.ListAPIView):
@@ -103,6 +104,65 @@ class ArtistTracksDetails(generics.GenericAPIView):
         return Response(serializer.data)
 
     def delete(self, request, artist_id, track_id):
+        self.get_queryset()[0].delete()
+        return Response({"message": "deleted successfully"}, status=204)
+
+
+class ArtistAlbumsList(generics.ListAPIView):
+    serializer_class = AlbumSerializer
+
+    def get_serializer_context(self):
+        return {"user": self.request.user, "request": self.request}
+
+    def get_queryset(self):
+        if self.queryset is not None:
+            return self.queryset
+        artist_id = self.kwargs['id']
+        if artist_id == 'me':
+            artist_id = self.request.user.id
+
+        if not Artist.objects.filter(pk=artist_id, user__is_artist=True).exists():
+            raise Http404
+        self.queryset = Album.objects.prefetch_related(
+            'tracks').filter(artist_id=artist_id)
+        return self.queryset
+
+
+class ArtistAlbumsDetails(generics.GenericAPIView):
+    serializer_class = AlbumSerializer
+
+    def get_serializer_context(self):
+        return {"user": self.request.user, "request": self.request}
+
+    def get_queryset(self):
+        if self.queryset is not None:
+            return self.queryset
+
+        artist_id = self.kwargs['artist_id']
+        album_id = self.kwargs['album_id']
+
+        if artist_id == 'me':
+            artist_id = self.request.user.id
+
+        if not Album.objects.filter(pk=album_id, artist_id=artist_id).exists():
+            raise Http404
+
+        self.queryset = Album.objects.prefetch_related(
+            'tracks').filter(pk=album_id, artist_id=artist_id)
+        return self.queryset
+
+    def get(self, request, artist_id, album_id):
         obj = self.get_queryset().first()
-        obj.delete()
+        serializer = self.get_serializer(obj)
+        return Response(serializer.data)
+
+    def patch(self, request, artist_id, album_id):
+        obj = self.get_queryset().first()
+        serializer = self.get_serializer(obj, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def delete(self, request, artist_id, album_id):
+        self.get_queryset()[0].delete()
         return Response({"message": "deleted successfully"}, status=204)
