@@ -55,6 +55,9 @@ class AlbumTrackDetail(generics.GenericAPIView):
         track = get_object_or_404(Track, pk=track_id, album_id=album_id)
         return track
 
+    def get_serializer_context(self):
+        return {"user": self.request.user, "request": self.request}
+
     def get_serializer_class(self):
         if self.request.method == 'PATCH':
             return TrackUpdateSerializer
@@ -78,6 +81,7 @@ class AlbumTrackDetail(generics.GenericAPIView):
         album = Album.objects.get(pk=album_id)
         album.song_count -= 1
         album.duration -= track.duration
-        track.delete()
+        track.album = None
         album.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        track.save()
+        return Response({"message": "track removed from the album successfuly"}, status=status.HTTP_204_NO_CONTENT)
