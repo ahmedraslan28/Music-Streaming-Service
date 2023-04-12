@@ -126,7 +126,7 @@ class ArtistTracksDetails(generics.GenericAPIView):
         return Response({"message": "deleted successfully"}, status=204)
 
 
-class ArtistAlbumsList(generics.ListAPIView):
+class ArtistAlbumsList(generics.ListCreateAPIView):
     serializer_class = AlbumSerializer
 
     def get_serializer_context(self):
