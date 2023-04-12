@@ -206,10 +206,15 @@ class ArtistSerializer(serializers.ModelSerializer):
         lookup_field='id'
     )
     user = UserSerializer(read_only=True)
-    user_id = serializers.IntegerField()
     # tracks = TrackSerializer(many=True, read_only=True)
     # albums = AlbumSerializer(many=True, read_only=True)
 
     class Meta:
         model = Artist
-        fields = ['user_id', 'bio', 'user', 'tracks', 'albums']
+        fields = ['bio', 'user', 'tracks', 'albums']
+
+
+class ArtistUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Artist
+        fields = ['bio']

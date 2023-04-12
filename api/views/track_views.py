@@ -14,7 +14,6 @@ class TrackList(generics.ListCreateAPIView):
 
 
 class TrackDetail(generics.RetrieveUpdateDestroyAPIView):
-
     def get_serializer_context(self):
         return {"user": self.request.user, "request": self.request}
 
@@ -32,11 +31,11 @@ class TrackDetail(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'id'
 
     def patch(self, request, *args, **kwargs):
-        obj = self.get_queryset()
-        serializer = self.get_serializer(obj[0], data=request.data)
+        obj = self.get_queryset().first()
+        serializer = self.get_serializer(obj, data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        serializer = TrackSerializer(obj[0])
+        obj = serializer.save()
+        serializer = TrackSerializer(obj)
         return Response(serializer.data)
 
     def delete(self, request, *args, **kwargs):
