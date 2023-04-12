@@ -7,7 +7,8 @@ from rest_framework.response import Response
 
 
 from ..serializers import (
-    AlbumSerializer, TrackSerializer, AlbumTrackSerializer, TrackUpdateSerializer)
+    AlbumSerializer, TrackSerializer, AlbumUpdateSerializer,
+    AlbumTrackSerializer, TrackUpdateSerializer)
 from ..models import Album, Track
 
 
@@ -21,9 +22,27 @@ class AlbumList(generics.ListCreateAPIView):
 
 
 class AlbumDetail(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = AlbumSerializer
-    queryset = Album.objects.prefetch_related('tracks').all()
+    def get_serializer_class(self):
+        if self.request.method == 'PATCH' or self.request.method == 'PUT':
+            return AlbumUpdateSerializer
+        return AlbumSerializer
+
     lookup_field = 'id'
+
+    def get_queryset(self):
+        if self.queryset is not None:
+            return self.queryset
+        self.queryset = Album.objects.prefetch_related(
+            'tracks').filter(pk=self.kwargs['id'])
+        return self.queryset
+
+    def patch(self, request, id):
+        obj = self.get_queryset()[0]
+        serializer = self.get_serializer(obj, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        obj = serializer.save()
+        serializer = AlbumSerializer(obj)
+        return Response(serializer.data)
 
 
 class AlbumTracks(generics.ListCreateAPIView):
