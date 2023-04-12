@@ -82,6 +82,8 @@ class PlaylistTracks(generics.ListCreateAPIView):
 
 
 class PlaylistTracksDetail(generics.GenericAPIView):
+    http_method_names = ['get', 'delete']
+
     def get_obj(self, playlist_id, track_id):
         track = get_object_or_404(Track, pk=track_id, playlists=playlist_id)
         return track
@@ -96,19 +98,11 @@ class PlaylistTracksDetail(generics.GenericAPIView):
         serializer = self.get_serializer(track)
         return Response(serializer.data)
 
-    def patch(self, request, playlist_id, track_id):
-        track = self.get_obj(playlist_id, track_id)
-        serializer = self.get_serializer(track, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        serializer = TrackSerializer(track)
-        return Response(serializer.data)
-
     def delete(self, request, playlist_id, track_id):
         track = self.get_obj(playlist_id, track_id)
-        plalylist = Playlist.objects.get(pk=playlist_id)
-        plalylist.song_count -= 1
-        plalylist.duration -= track.duration
-        track.delete()
-        plalylist.save()
+        playlist = Playlist.objects.get(pk=playlist_id)
+        playlist.song_count -= 1
+        playlist.duration -= track.duration
+        playlist.save()
+        playlist.tracks.remove(track)
         return Response({"message": "the track deleted from the playlist successfuly"}, status=204)
