@@ -117,7 +117,8 @@ class ArtistTracksDetails(generics.GenericAPIView):
         obj = self.get_queryset().first()
         serializer = self.get_serializer(obj, data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        obj = serializer.save()
+        serializer = TrackSerializer(obj)
         return Response(serializer.data)
 
     def delete(self, request, artist_id, track_id):
