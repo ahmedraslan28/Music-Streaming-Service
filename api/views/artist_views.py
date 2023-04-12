@@ -4,7 +4,8 @@ from rest_framework import generics
 from rest_framework.response import Response
 
 from ..serializers import (
-    ArtistSerializer, ArtistUpdateSerializer, TrackSerializer, TrackUpdateSerializer, AlbumSerializer)
+    ArtistSerializer, ArtistUpdateSerializer, AlbumUpdateSerializer,
+    TrackSerializer, TrackUpdateSerializer, AlbumSerializer)
 from ..models import Artist, Track, Album
 
 
@@ -147,7 +148,11 @@ class ArtistAlbumsList(generics.ListCreateAPIView):
 
 
 class ArtistAlbumsDetails(generics.GenericAPIView):
-    serializer_class = AlbumSerializer
+
+    def get_serializer_class(self):
+        if self.request.method == 'PATCH':
+            return AlbumUpdateSerializer
+        return AlbumSerializer
 
     def get_serializer_context(self):
         return {"user": self.request.user, "request": self.request}
@@ -178,7 +183,8 @@ class ArtistAlbumsDetails(generics.GenericAPIView):
         obj = self.get_queryset().first()
         serializer = self.get_serializer(obj, data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        obj = serializer.save()
+        serializer = AlbumSerializer(obj)
         return Response(serializer.data)
 
     def delete(self, request, artist_id, album_id):

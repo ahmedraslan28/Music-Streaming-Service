@@ -98,6 +98,12 @@ class AlbumSerializer(serializers.ModelSerializer):
         return super().save(artist=user.artist, **self.validated_data)
 
 
+class AlbumUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Album
+        fields = ['name']
+
+
 class AlbumTrackSerializer(serializers.Serializer):
     track_id = serializers.IntegerField()
 
