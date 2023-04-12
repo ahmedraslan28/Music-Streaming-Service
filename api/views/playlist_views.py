@@ -88,10 +88,7 @@ class PlaylistTracksDetail(generics.GenericAPIView):
         track = get_object_or_404(Track, pk=track_id, playlists=playlist_id)
         return track
 
-    def get_serializer_class(self):
-        if self.request.method == 'PATCH':
-            return TrackUpdateSerializer
-        return TrackSerializer
+    serializer_class = TrackSerializer
 
     def get(self, request, playlist_id, track_id):
         track = self.get_obj(playlist_id, track_id)

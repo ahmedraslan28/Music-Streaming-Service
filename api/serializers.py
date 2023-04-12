@@ -192,6 +192,29 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'playlists']
 
 
+class CategoryPlaylistSerializer(serializers.Serializer):
+    playlist_id = serializers.IntegerField()
+
+    def validate_playlist_id(self, playlist_id):
+        if not Playlist.objects.filter(pk=playlist_id).exists():
+            raise serializers.ValidationError(
+                {"message": "No Playlist with given Id Was Found."})
+
+        if Category.objects.filter(playlists=playlist_id).exists():
+            raise serializers.ValidationError(
+                {"message": "The Playlist already belong to this category."})
+        return playlist_id
+
+    def save(self, **kwargs):
+        validated_data = {**self.validated_data}
+        category_id = self.context['category_id']
+        playlist_id = validated_data['playlist_id']
+        category = Category.objects.get(pk=category_id)
+        playlist = Playlist.objects.get(pk=playlist_id)
+        category.playlists.add(playlist)
+        return playlist
+
+
 class SubscriptionPlanSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubscriptionPlan
