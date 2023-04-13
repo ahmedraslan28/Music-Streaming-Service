@@ -35,7 +35,7 @@ class AlbumList(generics.ListCreateAPIView):
 class AlbumDetail(generics.RetrieveUpdateDestroyAPIView):
     http_method_names = ['get', 'patch', 'delete', 'head', 'options']
 
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly, permissions.IsAuthenticated]
 
     def get_serializer_class(self):
         if self.request.method == 'PATCH' or self.request.method == 'PUT':
@@ -61,6 +61,8 @@ class AlbumDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class AlbumTracks(generics.ListCreateAPIView):
+    permission_classes = [IsOwnerOrReadOnly, permissions.IsAuthenticated]
+
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return AlbumTrackSerializer
@@ -85,6 +87,8 @@ class AlbumTracks(generics.ListCreateAPIView):
 
 
 class AlbumTrackDetail(generics.GenericAPIView):
+    permission_classes = [IsOwnerOrReadOnly, permissions.IsAuthenticated]
+
     def get_obj(self, track_id, album_id):
         track = get_object_or_404(Track, pk=track_id, album_id=album_id)
         return track
