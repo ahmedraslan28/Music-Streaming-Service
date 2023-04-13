@@ -33,6 +33,10 @@ class AlbumList(generics.ListCreateAPIView):
 
 
 class AlbumDetail(generics.RetrieveUpdateDestroyAPIView):
+    http_method_names = ['get', 'patch', 'delete', 'head', 'options']
+
+    permission_classes = [IsOwnerOrReadOnly]
+
     def get_serializer_class(self):
         if self.request.method == 'PATCH' or self.request.method == 'PUT':
             return AlbumUpdateSerializer

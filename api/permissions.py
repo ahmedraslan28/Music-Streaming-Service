@@ -39,6 +39,13 @@ class IsArtist(permissions.BasePermission):
         return bool(request.user and request.user.is_artist)
 
 
+class IsOwnerOrReadOnly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return bool(obj.artist.user == request.user)
+
+
 # class IsReviewerOrReadOnly(permissions.BasePermission):
 #     def has_object_permission(self, request, view, obj: Review):
 #         if request.method in permissions.SAFE_METHODS:
