@@ -2,18 +2,29 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 
 
-from rest_framework import generics, status
+from rest_framework import generics, status, permissions
 from rest_framework.response import Response
+from rest_condition import Or, And, Not
 
 
 from ..serializers import (
     AlbumSerializer, TrackSerializer, AlbumUpdateSerializer,
     AlbumTrackSerializer, TrackUpdateSerializer)
 from ..models import Album, Track
+from ..permissions import *
+
+# post for Artist and retrieve for admins
 
 
 class AlbumList(generics.ListCreateAPIView):
-  # to add permissions allow create for artists and retreive for admins
+
+    permission_classes = [
+        Or(
+            And(IsReadyOnlyRequest, permissions.IsAdminUser),
+            And(IsPostRequest, Or(permissions.IsAdminUser, IsArtist))
+        )
+    ]
+
     serializer_class = AlbumSerializer
     queryset = Album.objects.prefetch_related('tracks').all()
 

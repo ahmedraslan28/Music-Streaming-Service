@@ -12,6 +12,7 @@ django-debug-toolbar = "*"
 pillow = "*"
 mutagen = "*"
 pydub = "*"
+rest-condition = "*"
 
 [dev-packages]
 autopep8 = "*"
