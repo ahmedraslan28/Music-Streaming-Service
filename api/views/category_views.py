@@ -1,29 +1,32 @@
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 
-from rest_framework import generics
+from rest_framework import generics, permissions
 from rest_framework.response import Response
 
 
 from ..serializers import (CategorySerializer,
                            CategoryPlaylistSerializer,
-                           PlaylistSerializer,
-                           PlaylistCreateSerializer)
+                           PlaylistSerializer,)
 from ..models import Category, Playlist
+from ..permissions import *
 
 
 class CategoryList(generics.ListCreateAPIView):
+    permission_classes = [IsReadyOnlyRequest | permissions.IsAdminUser]
     serializer_class = CategorySerializer
     queryset = Category.objects.prefetch_related('playlists')
 
 
 class CategoryDetails(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsReadyOnlyRequest | permissions.IsAdminUser]
     serializer_class = CategorySerializer
     queryset = Category.objects.prefetch_related('playlists')
     lookup_field = 'id'
 
 
 class CategoriesPlaylists(generics.GenericAPIView):
+    permission_classes = [IsReadyOnlyRequest | permissions.IsAdminUser]
     serializer_class = PlaylistSerializer
 
     def get_serializer_class(self):
@@ -58,6 +61,7 @@ class CategoriesPlaylists(generics.GenericAPIView):
 
 
 class CategoriesPlaylistsDetails(generics.GenericAPIView):
+    permission_classes = [IsReadyOnlyRequest | permissions.IsAdminUser]
     http_method_names = ['get', 'delete']
 
     def get_obj(self, category_id, playlist_id):
