@@ -3,9 +3,12 @@ from rest_framework.response import Response
 
 from ..models import Track
 from ..serializers import TrackSerializer, TrackUpdateSerializer
+from ..permissions import *
 
 
 class TrackList(generics.ListCreateAPIView):
+    permission_classes = [IsReadyOnlyRequest | IsArtist]
+
     serializer_class = TrackSerializer
     queryset = Track.objects.all()
 
@@ -14,6 +17,8 @@ class TrackList(generics.ListCreateAPIView):
 
 
 class TrackDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsReadyOnlyRequest | IsOwner]
+
     def get_serializer_context(self):
         return {"user": self.request.user, "request": self.request}
 
