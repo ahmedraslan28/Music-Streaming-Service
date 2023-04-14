@@ -21,7 +21,7 @@ class ArtistList(generics.ListAPIView):
 
 class ArtistDetails(generics.GenericAPIView):
 
-    permission_classes = [IsArtistProfileOrReadOnly]
+    permission_classes = [IsArtistProfileOrReadOnly | permissions.IsAdminUser]
 
     http_method_names = ['get', 'patch']
 
@@ -59,6 +59,8 @@ class ArtistDetails(generics.GenericAPIView):
 
 
 class ArtistTracksList(generics.GenericAPIView):
+    permission_classes = [IsArtistProfileOrReadOnly | permissions.IsAdminUser]
+
     serializer_class = TrackSerializer
 
     def get_serializer_context(self):
