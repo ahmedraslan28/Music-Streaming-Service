@@ -2,9 +2,8 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 
 
-from rest_framework import generics, status, permissions
+from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_condition import Or, And, Not
 
 
 from ..serializers import (
