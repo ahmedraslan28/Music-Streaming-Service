@@ -16,12 +16,7 @@ from ..permissions import *
 
 class AlbumList(generics.ListCreateAPIView):
 
-    permission_classes = [
-        Or(
-            And(IsReadyOnlyRequest, permissions.IsAdminUser),
-            And(IsPostRequest, Or(permissions.IsAdminUser, IsArtist))
-        )
-    ]
+    permission_classes = [IsReadyOnlyRequest | IsArtist]
 
     serializer_class = AlbumSerializer
     queryset = Album.objects.prefetch_related('tracks').all()
@@ -33,10 +28,10 @@ class AlbumList(generics.ListCreateAPIView):
 class AlbumDetail(generics.RetrieveUpdateDestroyAPIView):
     http_method_names = ['get', 'patch', 'delete', 'head', 'options']
 
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsReadyOnlyRequest | IsOwner]
 
     def get_serializer_class(self):
-        if self.request.method == 'PATCH' or self.request.method == 'PUT':
+        if self.request.method == 'PATCH':
             return AlbumUpdateSerializer
         return AlbumSerializer
 
@@ -59,7 +54,7 @@ class AlbumDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class AlbumTracks(generics.ListCreateAPIView):
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsReadyOnlyRequest | IsOwner]
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -85,11 +80,17 @@ class AlbumTracks(generics.ListCreateAPIView):
 
 
 class AlbumTrackDetail(generics.GenericAPIView):
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwner | IsReadyOnlyRequest]
 
-    def get_obj(self, track_id, album_id):
-        track = get_object_or_404(Track, pk=track_id, album_id=album_id)
-        return track
+    def get_queryset(self):
+        track_id = self.kwargs['track_id']
+        album_id = self.kwargs['album_id']
+        if self.queryset:
+            return self.queryset
+        if not Track.objects.filter(pk=track_id, album_id=album_id).exists():
+            raise Http404
+        self.queryset = Track.objects.filter(pk=track_id, album_id=album_id)
+        return self.queryset
 
     def get_serializer_context(self):
         return {"user": self.request.user, "request": self.request}
@@ -100,12 +101,12 @@ class AlbumTrackDetail(generics.GenericAPIView):
         return TrackSerializer
 
     def get(self,  request, album_id, track_id,):
-        track = self.get_obj(track_id, album_id)
+        track = self.get_queryset()[0]
         serializer = self.get_serializer(track)
         return Response(serializer.data)
 
     def patch(self,  request, album_id, track_id,):
-        track = self.get_obj(track_id, album_id)
+        track = self.get_queryset()[0]
         serializer = self.get_serializer(track, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -113,7 +114,7 @@ class AlbumTrackDetail(generics.GenericAPIView):
         return Response(serializer.data)
 
     def delete(self, request, album_id, track_id):
-        track = self.get_obj(track_id, album_id)
+        track = self.get_queryset()[0]
         album = Album.objects.get(pk=album_id)
         album.song_count -= 1
         album.duration -= track.duration
