@@ -1,18 +1,20 @@
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 
-from rest_framework import generics
+from rest_framework import generics, permissions
 from rest_framework.response import Response
 
 from ..serializers import (PlaylistSerializer,
                            PlaylistCreateSerializer,
                            PlaylistTrackSerializer,
-                           TrackSerializer,
-                           TrackUpdateSerializer, )
+                           TrackSerializer)
 from ..models import Playlist, Track, RecentlyDeletedPlaylists
+from ..permissions import *
 
 
 class PlaylistList(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
     queryset = Playlist.objects.prefetch_related('tracks').all()
 
     def get_serializer_class(self):
@@ -31,6 +33,8 @@ class PlaylistList(generics.ListCreateAPIView):
 
 
 class PlaylistDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
     def get_serializer_class(self):
         if self.request.method == 'PUT' or self.request.method == 'PATCH':
             return PlaylistCreateSerializer
@@ -58,6 +62,8 @@ class PlaylistDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class PlaylistTracks(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return PlaylistTrackSerializer
@@ -82,6 +88,8 @@ class PlaylistTracks(generics.ListCreateAPIView):
 
 
 class PlaylistTracksDetail(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
     http_method_names = ['get', 'delete']
 
     def get_obj(self, playlist_id, track_id):
