@@ -1,4 +1,5 @@
 from django.http import Http404
+from django.shortcuts import get_object_or_404
 
 from rest_framework import generics, permissions
 from rest_framework.response import Response
@@ -21,8 +22,7 @@ class ArtistList(generics.ListAPIView):
 
 class ArtistDetails(generics.GenericAPIView):
 
-    permission_classes = [IsReadyOnlyRequest |
-                          IsArtistProfile | permissions.IsAdminUser]
+    permission_classes = [IsReadyOnlyRequest | IsArtistProfile]
 
     http_method_names = ['get', 'patch']
 
@@ -60,7 +60,7 @@ class ArtistDetails(generics.GenericAPIView):
 
 
 class ArtistTracksList(generics.GenericAPIView):
-    # permission_classes = [IsOwnerOrReadOnly | permissions.IsAdminUser]
+    permission_classes = [IsReadyOnlyRequest | IsOwner]
 
     serializer_class = TrackSerializer
 
@@ -73,6 +73,7 @@ class ArtistTracksList(generics.GenericAPIView):
         id = self.kwargs['id']
         if id == 'me':
             id = self.request.user.id
+
         if not Artist.objects.filter(pk=id, user__is_artist=True).exists():
             raise Http404
 
@@ -92,7 +93,7 @@ class ArtistTracksList(generics.GenericAPIView):
 
 
 class ArtistTracksDetails(generics.GenericAPIView):
-    # permission_classes = [IsArtistProfileOrReadOnly | permissions.IsAdminUser]
+    permission_classes = [IsReadyOnlyRequest | IsOwner]
 
     def get_serializer_class(self):
         if self.request.method == 'PATCH':
@@ -137,6 +138,7 @@ class ArtistTracksDetails(generics.GenericAPIView):
 
 
 class ArtistAlbumsList(generics.ListCreateAPIView):
+    permission_classes = [IsReadyOnlyRequest | IsOwner]
     serializer_class = AlbumSerializer
 
     def get_serializer_context(self):
@@ -157,6 +159,7 @@ class ArtistAlbumsList(generics.ListCreateAPIView):
 
 
 class ArtistAlbumsDetails(generics.GenericAPIView):
+    permission_classes = [IsReadyOnlyRequest | IsOwner]
 
     def get_serializer_class(self):
         if self.request.method == 'PATCH':

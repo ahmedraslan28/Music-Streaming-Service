@@ -33,12 +33,12 @@ class IsArtist(permissions.BasePermission):
 
 
 class IsOwner(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return request.user.is_artist and obj.artist.user == request.user
-
     def has_permission(self, request, view):
         obj = view.get_queryset().first()
         return obj and self.has_object_permission(request, view, obj)
+
+    def has_object_permission(self, request, view, obj):
+        return request.user.is_artist and obj.artist.user == request.user
 
 
 class IsArtistProfile(permissions.BasePermission):
