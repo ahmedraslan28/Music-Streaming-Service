@@ -1,12 +1,13 @@
 from django.http import Http404
 
-from rest_framework import generics
+from rest_framework import generics, permissions
 from rest_framework.response import Response
 
 from ..serializers import (
     ArtistSerializer, ArtistUpdateSerializer, AlbumUpdateSerializer,
     TrackSerializer, TrackUpdateSerializer, AlbumSerializer)
 from ..models import Artist, Track, Album
+from ..permissions import *
 
 
 class ArtistList(generics.ListAPIView):
@@ -19,7 +20,10 @@ class ArtistList(generics.ListAPIView):
 
 
 class ArtistDetails(generics.GenericAPIView):
-    http_method_names = ['get', 'patch', 'delete']
+
+    permission_classes = [IsArtistProfileOrReadOnly]
+
+    http_method_names = ['get', 'patch']
 
     def get_serializer_class(self):
         if self.request.method == 'PATCH':
