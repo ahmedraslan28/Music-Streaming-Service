@@ -1,20 +1,23 @@
-from rest_framework import generics
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import status
-
 from django.conf import settings
 from django.utils import timezone
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth import get_user_model
 from django.views.decorators.csrf import csrf_exempt
 
+
+from rest_framework import generics
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+
+
 import stripe
 
-from ..serializers import UserSerializer, TrackSerializer
+from ..serializers import UserSerializer, TrackSerializer, PlaylistSerializer
 from ..models import (
-    SubscriptionPlan, User_SubscriptionPlan, Track, LikedTrack)
+    SubscriptionPlan, User_SubscriptionPlan, Track, LikedTrack, Playlist, LikedPlaylist)
 
 User = get_user_model()
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -76,7 +79,26 @@ class UserSavedTracks(generics.GenericAPIView):
 
     def get(self, request):
         tracks = self.get_queryset()
-        serializer = TrackSerializer(tracks, many=True)
+        serializer = self.get_serializer(tracks, many=True)
+        return Response(serializer.data)
+
+
+class UserSavedPlaylists(generics.GenericAPIView):
+    serializer_class = PlaylistSerializer
+
+    def get_queryset(self):
+        if self.queryset:
+            return self.queryset
+        liked_playlists = LikedPlaylist.objects.filter(user=self.request.user)
+        playlist_ids = liked_playlists.values_list('playlist_id', flat=True)
+        self.queryset = Playlist.objects.filter(
+            Q(id__in=playlist_ids) | Q(user=self.request.user))
+
+        return self.queryset
+
+    def get(self, request):
+        playlists = self.get_queryset()
+        serializer = self.get_serializer(playlists, many=True)
         return Response(serializer.data)
 
 
