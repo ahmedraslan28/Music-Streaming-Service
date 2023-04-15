@@ -1,5 +1,16 @@
 from django.urls import path
 from ..views.user_views import *
+
+# /tracks/:id/likes
+# /playlists/:id/likes
+# /albums/:id/likes
+# user/me/tracks/
+# user/me/tracks/:id
+# user/me/playlist/
+# user/me/playlist/:id
+# user/me/albums/
+# user/me/albums/:id
+# add permissions
 urlpatterns = [
     path('', UsersList.as_view(), name='get-all-users'),
     path('<int:id>/', UsersDetail.as_view(), name='get-user-profile'),

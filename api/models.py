@@ -47,7 +47,6 @@ class Album(models.Model):
 class LikedAlbum(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='favourite_albums')
-    name = models.CharField(max_length=255)
     album = models.ForeignKey(
         Album, on_delete=models.CASCADE, related_name='users_favourite_album')
     created_at = models.DateField(auto_now_add=True)

@@ -247,3 +247,12 @@ class ArtistUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Artist
         fields = ['bio']
+
+
+class LikedTracksSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField()
+    track_id = serializers.IntegerField()
+
+    class Meta:
+        model = LikedTrack
+        fields = ['user_id', 'track_id', 'created_at']
