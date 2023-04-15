@@ -1,8 +1,7 @@
 from django.urls import path
 from ..views.user_views import *
 
-# user/me/albums/
-# user/me/albums/:id
+
 # add permissions
 urlpatterns = [
     path('', UsersList.as_view(), name='get-all-users'),
