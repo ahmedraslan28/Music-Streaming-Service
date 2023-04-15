@@ -1,9 +1,6 @@
 from django.urls import path
 from ..views.user_views import *
 
-# /tracks/:id/likes
-# /playlists/:id/likes
-# /albums/:id/likes
 # user/me/tracks/
 # user/me/tracks/:id
 # user/me/playlist/
