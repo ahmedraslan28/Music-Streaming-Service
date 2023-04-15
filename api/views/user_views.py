@@ -66,6 +66,7 @@ class UserProfile(generics.GenericAPIView):
 
 
 class UserSavedTracks(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = TrackSerializer
 
     def get_queryset(self):
@@ -84,6 +85,8 @@ class UserSavedTracks(generics.GenericAPIView):
 
 
 class UserSavedPlaylists(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
     serializer_class = PlaylistSerializer
 
     def get_queryset(self):
