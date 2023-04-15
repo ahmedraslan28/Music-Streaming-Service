@@ -90,7 +90,6 @@ class Playlist(models.Model):
     song_count = models.PositiveIntegerField(default=0)
     duration = models.PositiveIntegerField(default=0)
     likes_count = models.PositiveIntegerField(default=0)
-    is_public = models.BooleanField(default=True)
     tracks = models.ManyToManyField(
         Track, related_name='playlists', blank=True)
     created_at = models.DateField(auto_now_add=True)
@@ -114,7 +113,6 @@ class RecentlyDeletedPlaylists(models.Model):
     playlist_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=100)
     likes_count = models.PositiveIntegerField(default=0)
-    is_public = models.BooleanField(default=True)
     created_at = models.DateField()
     deleted_at = models.DateField(auto_now_add=True)
 

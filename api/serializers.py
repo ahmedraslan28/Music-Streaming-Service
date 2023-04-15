@@ -138,14 +138,14 @@ class PlaylistSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Playlist
-        fields = ['id', 'name', 'user_id', 'is_public', 'created_at',
+        fields = ['id', 'name', 'user_id', 'created_at',
                   'song_count', 'duration', 'likes_count', 'tracks']
 
 
 class PlaylistCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Playlist
-        fields = ['name', 'is_public']
+        fields = ['name']
 
     def save(self, **kwargs):
         user = self.context['user']

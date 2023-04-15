@@ -55,7 +55,6 @@ class PlaylistDetail(generics.RetrieveUpdateDestroyAPIView):
             playlist_id=id,
             name=obj.name,
             likes_count=obj.likes_count,
-            is_public=obj.is_public,
             created_at=obj.created_at
         )
         obj.delete()
