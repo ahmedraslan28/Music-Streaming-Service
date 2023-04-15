@@ -26,6 +26,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 # add permissions
 class UsersList(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
     queryset = User.objects.filter(is_artist=False, is_active=True)\
         .only('profile_image', 'first_name', 'last_name', 'username', 'followers_count',
@@ -34,6 +35,8 @@ class UsersList(generics.ListAPIView):
 
 
 class UsersDetail(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+
     serializer_class = UserSerializer
     queryset = User.objects.filter(is_artist=False, is_active=True)\
         .only('first_name', 'last_name', 'username', 'followers_count',
