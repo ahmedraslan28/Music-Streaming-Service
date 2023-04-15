@@ -120,8 +120,7 @@ class PlaylistLikes(APIView):
 
     def get(self, request, id):
         playlist = get_object_or_404(Playlist, pk=id)
-        TrackLikes = LikedPlaylist.objects.filter(
-            playlist=playlist, user=request.user)
+        TrackLikes = LikedPlaylist.objects.filter(playlist=playlist)
         serializer = LikedPlaylistsSerializer(TrackLikes, many=True)
         return Response(serializer.data)
 

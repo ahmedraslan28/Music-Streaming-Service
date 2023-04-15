@@ -265,3 +265,12 @@ class LikedPlaylistsSerializer(serializers.ModelSerializer):
     class Meta:
         model = LikedPlaylist
         fields = ['user_id', 'playlist_id', 'created_at']
+
+
+class LikedAlbumsSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField()
+    album_id = serializers.IntegerField()
+
+    class Meta:
+        model = LikedPlaylist
+        fields = ['user_id', 'album_id', 'created_at']

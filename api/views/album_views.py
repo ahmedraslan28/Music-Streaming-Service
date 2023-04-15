@@ -4,12 +4,13 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 
 from ..serializers import (
     AlbumSerializer, TrackSerializer, AlbumUpdateSerializer,
-    AlbumTrackSerializer, TrackUpdateSerializer)
-from ..models import Album, Track
+    AlbumTrackSerializer, TrackUpdateSerializer, LikedAlbumsSerializer)
+from ..models import Album, Track, LikedAlbum
 from ..permissions import *
 
 
@@ -121,3 +122,29 @@ class AlbumTrackDetail(generics.GenericAPIView):
         album.save()
         track.save()
         return Response({"message": "track removed from the album successfuly"}, status=status.HTTP_204_NO_CONTENT)
+
+
+class AlbumLikes(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, id):
+        album = get_object_or_404(Album, pk=id)
+        AlbumLikes = LikedAlbum.objects.filter(album=album)
+        serializer = LikedAlbumsSerializer(AlbumLikes, many=True)
+        return Response(serializer.data)
+
+    def post(self, reqeust, id):
+        album = get_object_or_404(Album, pk=id)
+        message = ""
+        if LikedAlbum.objects.filter(user=reqeust.user, album=album).exists():
+            LikedAlbum.objects.filter(user=reqeust.user, album=album).delete()
+            album.likes_count -= 1
+            album.save()
+            message = "The album has been dislikes successfully"
+        else:
+            LikedAlbum.objects.create(user=reqeust.user, album=album)
+            album.likes_count += 1
+            album.save()
+            message = "The album has been liked successfully"
+
+        return Response({"message": message}, status=200)
