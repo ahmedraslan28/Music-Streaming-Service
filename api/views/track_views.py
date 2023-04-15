@@ -58,7 +58,7 @@ class TrackLikes(APIView):
 
     def get(self, request, id):
         track = get_object_or_404(Track, pk=id)
-        TrackLikes = LikedTrack.objects.filter(track=track, user=request.user)
+        TrackLikes = LikedTrack.objects.filter(track=track)
         serializer = LikedTracksSerializer(TrackLikes, many=True)
         return Response(serializer.data)
 
@@ -68,10 +68,12 @@ class TrackLikes(APIView):
         if LikedTrack.objects.filter(user=reqeust.user, track=track).exists():
             LikedTrack.objects.filter(user=reqeust.user, track=track).delete()
             track.likes_count -= 1
+            track.save()
             message = "The track has been dislikes successfully"
         else:
             LikedTrack.objects.create(user=reqeust.user, track=track)
             track.likes_count += 1
+            track.save()
             message = "The track has been liked successfully"
 
         return Response({"message": message}, status=200)
