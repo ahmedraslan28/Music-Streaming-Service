@@ -15,9 +15,10 @@ from rest_framework import status
 
 import stripe
 
-from ..serializers import UserSerializer, TrackSerializer, PlaylistSerializer
+from ..serializers import (
+    UserSerializer, TrackSerializer, PlaylistSerializer, AlbumSerializer)
 from ..models import (
-    SubscriptionPlan, User_SubscriptionPlan, Track, LikedTrack, Playlist, LikedPlaylist)
+    SubscriptionPlan, User_SubscriptionPlan, Track, LikedTrack, Playlist, LikedPlaylist, Album, LikedAlbum)
 
 User = get_user_model()
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -102,6 +103,26 @@ class UserSavedPlaylists(generics.GenericAPIView):
     def get(self, request):
         playlists = self.get_queryset()
         serializer = self.get_serializer(playlists, many=True)
+        return Response(serializer.data)
+
+
+class UserSavedAlbums(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    serializer_class = AlbumSerializer
+
+    def get_queryset(self):
+        if self.queryset:
+            return self.queryset
+        liked_albums = LikedAlbum.objects.filter(user=self.request.user)
+        album_ids = liked_albums.values_list('album_id', flat=True)
+        self.queryset = Album.objects.filter(id__in=album_ids)
+
+        return self.queryset
+
+    def get(self, request):
+        album = self.get_queryset()
+        serializer = self.get_serializer(album, many=True)
         return Response(serializer.data)
 
 

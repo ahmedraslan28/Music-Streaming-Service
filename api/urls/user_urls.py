@@ -11,6 +11,7 @@ urlpatterns = [
     path('me/tracks/', UserSavedTracks.as_view(), name='get-currentUser-tracks'),
     path('me/playlists/', UserSavedPlaylists.as_view(),
          name='get-currentUser-playlists'),
+    path('me/albums/', UserSavedAlbums.as_view(), name='get-currentUser-albums'),
     path('checkout/<int:plan_id>/', checkout, name='checkout'),
     path('upgrade/success/', success, name='success-view'),
     path('upgrade/cancel/', cancel, name='cancel-view'),
