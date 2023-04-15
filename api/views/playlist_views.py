@@ -33,7 +33,7 @@ class PlaylistList(generics.ListCreateAPIView):
 
 
 class PlaylistDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsPlaylistOwner | IsReadyOnlyRequest]
 
     def get_serializer_class(self):
         if self.request.method == 'PUT' or self.request.method == 'PATCH':
@@ -62,7 +62,7 @@ class PlaylistDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class PlaylistTracks(generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsPlaylistOwner | IsReadyOnlyRequest]
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -88,7 +88,7 @@ class PlaylistTracks(generics.ListCreateAPIView):
 
 
 class PlaylistTracksDetail(generics.GenericAPIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsReadyOnlyRequest | IsPlaylistOwner]
 
     http_method_names = ['get', 'delete']
 

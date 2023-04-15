@@ -32,6 +32,17 @@ class IsArtist(permissions.BasePermission):
         return bool(request.user and request.user.is_artist)
 
 
+class IsPlaylistOwner(permissions.BasePermission):
+    def has_permission(self, request, view):
+        id = view.kwargs.get('id')
+        if not id:
+            id = view.kwargs.get('playlist_id')
+
+        obj = Playlist.objects.filter(pk=id).first()
+
+        return obj and request.user and obj.user == request.user
+
+
 class IsOwner(permissions.BasePermission):
     def has_permission(self, request, view):
         obj = view.get_queryset().first()

@@ -158,7 +158,7 @@ class PlaylistTrackSerializer(serializers.Serializer):
     def validate(self, attrs):
         track = Track.objects.filter(pk=attrs['track_id'])
         playlist_id = self.context['playlist_id']
-        if Playlist.objects.filter(tracks=track[0]).exists():
+        if Playlist.objects.filter(pk=playlist_id, tracks=track.first()).exists():
             raise serializers.ValidationError(
                 'The Track already belong to this playlist.')
         if not track.exists():
