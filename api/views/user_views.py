@@ -12,8 +12,9 @@ from django.views.decorators.csrf import csrf_exempt
 
 import stripe
 
-from ..serializers import UserSerializer
-from ..models import (SubscriptionPlan, User_SubscriptionPlan)
+from ..serializers import UserSerializer, TrackSerializer
+from ..models import (
+    SubscriptionPlan, User_SubscriptionPlan, Track, LikedTrack)
 
 User = get_user_model()
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -58,6 +59,24 @@ class UserProfile(generics.GenericAPIView):
         serializer = self.get_serializer(obj, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        return Response(serializer.data)
+
+
+class UserSavedTracks(generics.GenericAPIView):
+    serializer_class = TrackSerializer
+
+    def get_queryset(self):
+        if self.queryset:
+            return self.queryset
+        liked_tracks = LikedTrack.objects.filter(user=self.request.user)
+        track_ids = liked_tracks.values_list('track_id', flat=True)
+        self.queryset = Track.objects.filter(id__in=track_ids)
+
+        return self.queryset
+
+    def get(self, request):
+        tracks = self.get_queryset()
+        serializer = TrackSerializer(tracks, many=True)
         return Response(serializer.data)
 
 
