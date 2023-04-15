@@ -1,10 +1,6 @@
 from django.urls import path
 from ..views.user_views import *
 
-# user/me/tracks/
-# user/me/tracks/:id
-# user/me/playlist/
-# user/me/playlist/:id
 # user/me/albums/
 # user/me/albums/:id
 # add permissions
