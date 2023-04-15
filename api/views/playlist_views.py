@@ -3,12 +3,14 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import generics, permissions
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from ..serializers import (PlaylistSerializer,
                            PlaylistCreateSerializer,
                            PlaylistTrackSerializer,
-                           TrackSerializer)
-from ..models import Playlist, Track, RecentlyDeletedPlaylists
+                           TrackSerializer,
+                           LikedPlaylistsSerializer)
+from ..models import Playlist, Track, RecentlyDeletedPlaylists, LikedPlaylist
 from ..permissions import *
 
 
@@ -111,3 +113,31 @@ class PlaylistTracksDetail(generics.GenericAPIView):
         playlist.save()
         playlist.tracks.remove(track)
         return Response({"message": "the track deleted from the playlist successfuly"}, status=204)
+
+
+class PlaylistLikes(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, id):
+        playlist = get_object_or_404(Playlist, pk=id)
+        TrackLikes = LikedPlaylist.objects.filter(
+            playlist=playlist, user=request.user)
+        serializer = LikedPlaylistsSerializer(TrackLikes, many=True)
+        return Response(serializer.data)
+
+    def post(self, reqeust, id):
+        playlist = get_object_or_404(Playlist, pk=id)
+        message = ""
+        if LikedPlaylist.objects.filter(user=reqeust.user, playlist=playlist).exists():
+            LikedPlaylist.objects.filter(
+                user=reqeust.user, playlist=playlist).delete()
+            playlist.likes_count -= 1
+            playlist.save()
+            message = "The playlist has been dislikes successfully"
+        else:
+            LikedPlaylist.objects.create(user=reqeust.user, playlist=playlist)
+            playlist.likes_count += 1
+            playlist.save()
+            message = "The playlist has been liked successfully"
+
+        return Response({"message": message}, status=200)

@@ -256,3 +256,12 @@ class LikedTracksSerializer(serializers.ModelSerializer):
     class Meta:
         model = LikedTrack
         fields = ['user_id', 'track_id', 'created_at']
+
+
+class LikedPlaylistsSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField()
+    playlist_id = serializers.IntegerField()
+
+    class Meta:
+        model = LikedPlaylist
+        fields = ['user_id', 'playlist_id', 'created_at']
