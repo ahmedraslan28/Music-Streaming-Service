@@ -24,7 +24,6 @@ User = get_user_model()
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-# add permissions
 class UsersList(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
