@@ -112,6 +112,8 @@ class LikedPlaylist(models.Model):
 class RecentlyDeletedPlaylists(models.Model):
     playlist_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=100)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='deleted_playlists')
     likes_count = models.PositiveIntegerField(default=0)
     created_at = models.DateField()
     deleted_at = models.DateField(auto_now_add=True)
