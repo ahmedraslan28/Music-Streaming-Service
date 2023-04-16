@@ -3,6 +3,9 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import FileExtensionValidator
 
 
+from auth.models import UserManager
+
+
 class User(AbstractUser):
 
     USERNAME_FIELD = 'email'
@@ -19,6 +22,8 @@ class User(AbstractUser):
 
     def __str__(self) -> str:
         return f'{self.email}'
+
+    objects = UserManager()
 
 
 class Artist(models.Model):
