@@ -54,6 +54,7 @@ class PlaylistDetail(generics.RetrieveUpdateDestroyAPIView):
         RecentlyDeletedPlaylists.objects.create(
             playlist_id=id,
             name=obj.name,
+            user=request.user,
             likes_count=obj.likes_count,
             created_at=obj.created_at
         )
