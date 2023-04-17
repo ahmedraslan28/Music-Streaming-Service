@@ -18,7 +18,7 @@ import stripe
 from ..serializers import (
     UserSerializer, TrackSerializer,
     PlaylistSerializer, AlbumSerializer,
-    DeletedPlaylistsSerializer, empty)
+    DeletedPlaylistsSerializer)
 from ..models import (
     SubscriptionPlan, User_SubscriptionPlan, Track, LikedTrack, Playlist, LikedPlaylist, Album, LikedAlbum)
 

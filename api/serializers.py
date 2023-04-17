@@ -291,5 +291,4 @@ class DeletedPlaylistsSerializer(serializers.ModelSerializer):
         fields = ['id', 'deleted_at', 'name', 'song_count']
 
 
-class empty(serializers.Serializer):
-    pass
+
