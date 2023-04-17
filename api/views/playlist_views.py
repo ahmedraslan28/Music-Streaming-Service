@@ -72,7 +72,6 @@ class PlaylistDetail(generics.GenericAPIView):
         obj = self.get_queryset().filter(pk=id)[0]
         obj.is_deleted = True
         obj.deleted_at = timezone.now()
-        obj.delete()
         obj.save()
         message = """playlist deleted successfully, you can restore it within 30 days."""
         return Response({"message": message}, status=204)
