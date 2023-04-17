@@ -1,7 +1,8 @@
 from django.http import Http404
+from django.utils import timezone
 from django.shortcuts import get_object_or_404
 
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -10,14 +11,15 @@ from ..serializers import (PlaylistSerializer,
                            PlaylistTrackSerializer,
                            TrackSerializer,
                            LikedPlaylistsSerializer)
-from ..models import Playlist, Track, RecentlyDeletedPlaylists, LikedPlaylist
+from ..models import Playlist, Track, LikedPlaylist
 from ..permissions import *
 
 
 class PlaylistList(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    queryset = Playlist.objects.prefetch_related('tracks').all()
+    queryset = Playlist.objects.prefetch_related(
+        'tracks').all().filter(is_deleted=False)
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -34,7 +36,7 @@ class PlaylistList(generics.ListCreateAPIView):
         return Response(serializer.data)
 
 
-class PlaylistDetail(generics.RetrieveUpdateDestroyAPIView):
+class PlaylistDetail(generics.GenericAPIView):
     permission_classes = [IsPlaylistOwner | IsReadyOnlyRequest]
 
     def get_serializer_class(self):
@@ -46,24 +48,37 @@ class PlaylistDetail(generics.RetrieveUpdateDestroyAPIView):
     def get_serializer_context(self):
         return {"user": self.request.user}
 
-    lookup_field = 'id'
-    queryset = Playlist.objects.prefetch_related('tracks').all()
+    def get_queryset(self):
+        if self.queryset:
+            return self.queryset
+        get_object_or_404(Playlist, pk=self.kwargs['id'], is_deleted=False)
+        self.queryset = Playlist.objects.select_related(
+            'user').filter(pk=self.kwargs['id'])
+        return self.queryset
+
+    def get(self, request, id):
+        obj = self.get_queryset().first()
+        serializer = self.get_serializer(obj)
+        return Response(serializer.data)
+
+    def patch(self, request, id):
+        obj = self.get_queryset().first()
+        serializer = self.get_serializer(obj, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
     def delete(self, request, id, *args, **kwargs):
         obj = self.get_queryset().filter(pk=id)[0]
-        RecentlyDeletedPlaylists.objects.create(
-            playlist_id=id,
-            name=obj.name,
-            likes_count=obj.likes_count,
-            created_at=obj.created_at
-        )
+        obj.is_deleted = True
+        obj.deleted_at = timezone.now()
         obj.delete()
+        obj.save()
         message = """playlist deleted successfully, you can restore it within 30 days."""
         return Response({"message": message}, status=204)
 
 
-class PlaylistTracks(generics.ListCreateAPIView):
-    permission_classes = [IsPlaylistOwner | IsReadyOnlyRequest]
+class PlaylistTracks(generics.GenericAPIView):
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -74,13 +89,25 @@ class PlaylistTracks(generics.ListCreateAPIView):
         if self.queryset is not None:
             return self.queryset
         playlist_id = self.kwargs['id']
-        if Playlist.objects.filter(pk=playlist_id).exists():
-            self.queryset = Track.objects.filter(playlists=playlist_id)
-            return self.queryset
-        raise Http404
+        playlist = get_object_or_404(
+            Playlist, pk=playlist_id, is_deleted=False)
+
+        self.queryset = playlist.tracks.all()
+
+        return self.queryset
+
+    def get(self, request, id):
+        obj = self.get_queryset()
+        serializer = self.get_serializer(obj, many=True)
+        return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
-        context = {"playlist_id": self.kwargs['id']}
+        playlist_id = self.kwargs['id']
+        playlist = get_object_or_404(
+            Playlist, pk=playlist_id, is_deleted=False)
+        if playlist.user != request.user:
+            return Response({"message": "you do not have permission to perform this action"}, status=status.HTTP_403_FORBIDDEN)
+        context = {"playlist_id": playlist_id}
         serializer = self.get_serializer(data=request.data, context=context)
         serializer.is_valid(raise_exception=True)
         track = serializer.save()
@@ -89,12 +116,12 @@ class PlaylistTracks(generics.ListCreateAPIView):
 
 
 class PlaylistTracksDetail(generics.GenericAPIView):
-    permission_classes = [IsReadyOnlyRequest | IsPlaylistOwner]
-
     http_method_names = ['get', 'delete']
 
     def get_obj(self, playlist_id, track_id):
-        track = get_object_or_404(Track, pk=track_id, playlists=playlist_id)
+        playlist = get_object_or_404(
+            Playlist, pk=playlist_id, is_deleted=False)
+        track = get_object_or_404(Track, pk=track_id, playlists=playlist)
         return track
 
     serializer_class = TrackSerializer
@@ -105,6 +132,11 @@ class PlaylistTracksDetail(generics.GenericAPIView):
         return Response(serializer.data)
 
     def delete(self, request, playlist_id, track_id):
+        playlist_id = self.kwargs['playlist_id']
+        playlist = get_object_or_404(
+            Playlist, pk=playlist_id, is_deleted=False)
+        if playlist.user != request.user:
+            return Response({"message": "you do not have permission to perform this action"}, status=status.HTTP_403_FORBIDDEN)
         track = self.get_obj(playlist_id, track_id)
         playlist = Playlist.objects.get(pk=playlist_id)
         playlist.song_count -= 1
@@ -118,13 +150,13 @@ class PlaylistLikes(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, id):
-        playlist = get_object_or_404(Playlist, pk=id)
+        playlist = get_object_or_404(Playlist, pk=id, is_deleted=False)
         TrackLikes = LikedPlaylist.objects.filter(playlist=playlist)
         serializer = LikedPlaylistsSerializer(TrackLikes, many=True)
         return Response(serializer.data)
 
     def post(self, reqeust, id):
-        playlist = get_object_or_404(Playlist, pk=id)
+        playlist = get_object_or_404(Playlist, pk=id, is_deleted=False)
         message = ""
         if LikedPlaylist.objects.filter(user=reqeust.user, playlist=playlist).exists():
             LikedPlaylist.objects.filter(

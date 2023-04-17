@@ -1,4 +1,4 @@
-
+from django.urls import reverse
 from django.contrib.auth import get_user_model
 
 from rest_framework import serializers
@@ -158,7 +158,7 @@ class PlaylistTrackSerializer(serializers.Serializer):
     def validate(self, attrs):
         track = Track.objects.filter(pk=attrs['track_id'])
         playlist_id = self.context['playlist_id']
-        if Playlist.objects.filter(pk=playlist_id, tracks=track.first()).exists():
+        if Playlist.objects.filter(pk=playlist_id, is_deleted=False, tracks=track.first()).exists():
             raise serializers.ValidationError(
                 'The Track already belong to this playlist.')
         if not track.exists():
@@ -179,13 +179,22 @@ class PlaylistTrackSerializer(serializers.Serializer):
         return track
 
 
+class PlaylistInfoSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    endpoint = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Playlist
+        fields = ['id', 'endpoint']
+
+    def get_endpoint(self, obj):
+        request = self.context['request']
+        return request.build_absolute_uri(reverse('playlist_details', args=[obj.id]))
+
+
 class CategorySerializer(serializers.ModelSerializer):
-    playlists = serializers.HyperlinkedRelatedField(
-        many=True,
-        read_only=True,
-        view_name='playlist_details',
-        lookup_field='id'
-    )
+    playlists = PlaylistInfoSerializer(
+        source='filtered_playlists', many=True, read_only=True)
 
     class Meta:
         model = Category
@@ -196,7 +205,7 @@ class CategoryPlaylistSerializer(serializers.Serializer):
     playlist_id = serializers.IntegerField()
 
     def validate_playlist_id(self, playlist_id):
-        if not Playlist.objects.filter(pk=playlist_id).exists():
+        if not Playlist.objects.filter(pk=playlist_id, is_deleted=False).exists():
             raise serializers.ValidationError(
                 {"message": "No Playlist with given Id Was Found."})
 
@@ -274,3 +283,13 @@ class LikedAlbumsSerializer(serializers.ModelSerializer):
     class Meta:
         model = LikedPlaylist
         fields = ['user_id', 'album_id', 'created_at']
+
+
+class DeletedPlaylistsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Playlist
+        fields = ['id', 'deleted_at', 'name', 'song_count']
+
+
+class empty(serializers.Serializer):
+    pass

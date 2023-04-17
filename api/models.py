@@ -98,6 +98,8 @@ class Playlist(models.Model):
     tracks = models.ManyToManyField(
         Track, related_name='playlists', blank=True)
     created_at = models.DateField(auto_now_add=True)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self) -> str:
         return self.name

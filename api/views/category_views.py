@@ -1,28 +1,41 @@
-from django.http import Http404
-from django.shortcuts import get_object_or_404
-
-from rest_framework import generics, permissions
-from rest_framework.response import Response
-
-
+from ..permissions import *
+from ..models import Category, Playlist
 from ..serializers import (CategorySerializer,
                            CategoryPlaylistSerializer,
-                           PlaylistSerializer,)
-from ..models import Category, Playlist
-from ..permissions import *
+                           PlaylistSerializer,
+                           PlaylistInfoSerializer,)
+from rest_framework.response import Response
+from rest_framework import generics, permissions
+from django.shortcuts import get_object_or_404
+from django.db.models import Prefetch
 
 
 class CategoryList(generics.ListCreateAPIView):
     permission_classes = [IsReadyOnlyRequest | permissions.IsAdminUser]
     serializer_class = CategorySerializer
-    queryset = Category.objects.prefetch_related('playlists')
+    queryset = Category.objects.prefetch_related(
+        'playlists').all()
+
+    queryset = Category.objects.prefetch_related(
+        Prefetch('playlists', queryset=Playlist.objects.filter(
+            is_deleted=False), to_attr='filtered_playlists')
+    )
+
+    def get_serializer_context(self):
+        return {"request": self.request}
 
 
 class CategoryDetails(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsReadyOnlyRequest | permissions.IsAdminUser]
     serializer_class = CategorySerializer
-    queryset = Category.objects.prefetch_related('playlists')
+    queryset = Category.objects.prefetch_related(
+        Prefetch('playlists', queryset=Playlist.objects.filter(
+            is_deleted=False), to_attr='filtered_playlists')
+    )
     lookup_field = 'id'
+
+    def get_serializer_context(self):
+        return {"request": self.request}
 
 
 class CategoriesPlaylists(generics.GenericAPIView):
@@ -32,17 +45,17 @@ class CategoriesPlaylists(generics.GenericAPIView):
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return CategoryPlaylistSerializer
-        return PlaylistSerializer
+        return PlaylistInfoSerializer
 
     def get_queryset(self):
         if self.queryset is not None:
             return self.queryset
 
         category_id = self.kwargs['id']
-        if not Category.objects.filter(id=category_id).exists():
-            raise Http404
 
-        self.queryset = Playlist.objects.filter(categories=category_id)
+        category = get_object_or_404(Category, pk=category_id)
+
+        self.queryset = category.playlists.filter(is_deleted=False)
 
         return self.queryset
 
@@ -66,7 +79,7 @@ class CategoriesPlaylistsDetails(generics.GenericAPIView):
 
     def get_obj(self, category_id, playlist_id):
         playlist = get_object_or_404(
-            Playlist, pk=playlist_id, categories=category_id)
+            Playlist, pk=playlist_id, is_deleted=False, categories=category_id)
         return playlist
 
     serializer_class = PlaylistSerializer

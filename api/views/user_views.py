@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.views.decorators.csrf import csrf_exempt
 
 
-from rest_framework import generics
+from rest_framework import generics, status, views
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -16,7 +16,9 @@ from rest_framework import status
 import stripe
 
 from ..serializers import (
-    UserSerializer, TrackSerializer, PlaylistSerializer, AlbumSerializer)
+    UserSerializer, TrackSerializer,
+    PlaylistSerializer, AlbumSerializer,
+    DeletedPlaylistsSerializer, empty)
 from ..models import (
     SubscriptionPlan, User_SubscriptionPlan, Track, LikedTrack, Playlist, LikedPlaylist, Album, LikedAlbum)
 
@@ -97,8 +99,8 @@ class UserSavedPlaylists(generics.GenericAPIView):
             return self.queryset
         liked_playlists = LikedPlaylist.objects.filter(user=self.request.user)
         playlist_ids = liked_playlists.values_list('playlist_id', flat=True)
-        self.queryset = Playlist.objects.filter(
-            Q(id__in=playlist_ids) | Q(user=self.request.user))
+        self.queryset = Playlist.objects.prefetch_related('tracks').filter(
+            (Q(id__in=playlist_ids) | Q(user=self.request.user)), is_deleted=False)
 
         return self.queryset
 
@@ -126,6 +128,41 @@ class UserSavedAlbums(generics.GenericAPIView):
         album = self.get_queryset()
         serializer = self.get_serializer(album, many=True)
         return Response(serializer.data)
+
+
+class UserDeletedPlaylists(generics.ListAPIView):
+    serializer_class = DeletedPlaylistsSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        if self.queryset:
+            return self.queryset
+        self.queryset = Playlist.objects.filter(
+            user=self.request.user, is_deleted=True)
+        return self.queryset
+
+
+class UserDeletedPlaylistsDetails(views.APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        get_object_or_404(Playlist, pk=self.kwargs['id'],
+                          user=self.request.user, is_deleted=True)
+        queryset = Playlist.objects.filter(pk=self.kwargs['id'],
+                                           user=self.request.user, is_deleted=True)
+        return queryset
+
+    def get(self, request, id):
+        obj = self.get_queryset()[0]
+        serializer = DeletedPlaylistsSerializer(obj)
+        return Response(serializer.data)
+
+    def post(self, request, id):
+        obj = self.get_queryset()[0]
+        obj.is_deleted = False
+        obj.deleted_at = None
+        obj.save()
+        return Response({"message": "The Playlist Restored successfully !"})
 
 
 @api_view(['GET'])
