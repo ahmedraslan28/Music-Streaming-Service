@@ -116,17 +116,6 @@ class LikedPlaylist(models.Model):
         return f'{self.user.first_name} like playlist {self.playlist.name}'
 
 
-class RecentlyDeletedPlaylists(models.Model):
-    playlist_id = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=100)
-    likes_count = models.PositiveIntegerField(default=0)
-    created_at = models.DateField()
-    deleted_at = models.DateField(auto_now_add=True)
-
-    def __str__(self) -> str:
-        return self.name
-
-
 class Category(models.Model):
     name = models.CharField(max_length=100)
     playlists = models.ManyToManyField(
