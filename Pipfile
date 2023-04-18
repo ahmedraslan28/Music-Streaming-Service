@@ -13,6 +13,7 @@ pillow = "*"
 mutagen = "*"
 pydub = "*"
 rest-condition = "*"
+channels = {extras = ["daphne"], version = "*"}
 
 [dev-packages]
 autopep8 = "*"

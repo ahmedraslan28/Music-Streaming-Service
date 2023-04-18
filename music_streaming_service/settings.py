@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'api.apps.ApiConfig',
     'auth.apps.AuthConfig',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -57,6 +59,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'music_streaming_service.urls'
+# ROOT_URLCONF = 'music_streaming_service.routing'
 
 TEMPLATES = [
     {
@@ -75,7 +78,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'music_streaming_service.wsgi.application'
-
+ASGI_APPLICATION = "music_streaming_service.asgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
@@ -85,6 +88,12 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
+}
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
 }
 
 
