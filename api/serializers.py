@@ -8,13 +8,31 @@ from .models import *
 User = get_user_model()
 
 
+class FollowedSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(read_only=True, source='followed')
+    user_name = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Follower
+        fields = ['user_id', 'user_name']
+
+    # def get_user_id(self, obj):
+    #     return obj.followed
+
+    def get_user_name(self, obj):
+        return obj.followed.first_name
+
+
 class UserSerializer(serializers.ModelSerializer):
     # to add userplaylists and user followers and following and add following count
+    followers = FollowedSerializer(many=True, read_only=True)
+    following = FollowedSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name',
-                  'username', 'email', 'is_premium', 'is_male', 'is_active', 'is_artist', 'followers_count', 'birth_date', 'profile_image']
+                  'username', 'email', 'is_premium', 'is_male', 'is_active', 'is_artist', 'followers_count',
+                  'following_count', 'birth_date', 'profile_image', 'followers', 'following']
         read_only_fields = ('is_premium', 'followers_count')
         write_only_fields = ('birth_date')
 
@@ -289,6 +307,3 @@ class DeletedPlaylistsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Playlist
         fields = ['id', 'deleted_at', 'name', 'song_count']
-
-
-

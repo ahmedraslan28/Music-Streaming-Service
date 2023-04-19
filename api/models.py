@@ -13,6 +13,7 @@ class User(AbstractUser):
 
     email = models.EmailField(unique=True)
     followers_count = models.PositiveIntegerField(default=0)
+    following_count = models.PositiveIntegerField(default=0)
     birth_date = models.DateField(blank=True, null=True)
     is_male = models.BooleanField(default=True)
     is_premium = models.BooleanField(default=False)

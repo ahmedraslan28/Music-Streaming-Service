@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import generics, status, views
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -29,21 +29,16 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 class UsersList(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
-    queryset = User.objects.filter(is_artist=False, is_active=True)\
-        .only('profile_image', 'first_name', 'last_name', 'username', 'followers_count',
-              'email', 'is_premium', 'is_male', 'birth_date')
-    # permission_classes = [IsAdminUser]
+    queryset = User.objects.filter(is_artist=False, is_active=True).all()
+    permission_classes = [IsAdminUser]
 
 
 class UsersDetail(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
     serializer_class = UserSerializer
-    queryset = User.objects.filter(is_artist=False, is_active=True)\
-        .only('first_name', 'last_name', 'username', 'followers_count',
-              'email', 'is_premium', 'is_male', 'birth_date', 'profile_image')
+    queryset = User.objects.filter(is_artist=False, is_active=True).all()
     lookup_field = 'id'
-    permission_classes = [IsAuthenticated]
 
 
 class UserProfile(generics.GenericAPIView):
@@ -163,6 +158,7 @@ class UserDeletedPlaylistsDetails(views.APIView):
         obj.deleted_at = None
         obj.save()
         return Response({"message": "The Playlist Restored successfully !"})
+
 
 
 @api_view(['GET'])
