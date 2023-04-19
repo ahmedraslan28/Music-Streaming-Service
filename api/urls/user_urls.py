@@ -6,6 +6,10 @@ from ..views.user_views import *
 urlpatterns = [
     path('', UsersList.as_view(), name='get-all-users'),
     path('<int:id>/', UsersDetail.as_view(), name='get-user-profile'),
+    path('<int:id>/followers/', UserFollower.as_view(), name='get-user-followers'),
+    path('<int:id>/following/', UserFollowing.as_view(), name='get-user-following'),
+    path('<int:id>/follow/', user_follow, name='user_follow'),
+    path('<int:id>/unfollow/', user_unfollow, name='user_unfollow'),
     path('me/', UserProfile.as_view(), name='get-currentUser-profile'),
     path('me/tracks/', UserSavedTracks.as_view(), name='get-currentUser-tracks'),
     path('me/playlists/', UserSavedPlaylists.as_view(),
@@ -16,8 +20,6 @@ urlpatterns = [
     path('me/recover-playlists/<int:id>/', UserDeletedPlaylistsDetails.as_view(),
          name='recover-currentUser-deleted-playlist'),
 
-    path('<int:id>/follow/', user_follow, name='user_follow'),
-    path('<int:id>/unfollow/', user_unfollow, name='user_unfollow'),
     path('checkout/<int:plan_id>/', checkout, name='checkout'),
     path('upgrade/success/', success, name='success-view'),
     path('upgrade/cancel/', cancel, name='cancel-view'),

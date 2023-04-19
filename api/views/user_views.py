@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.http import Http404
 from django.utils import timezone
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
@@ -18,7 +19,7 @@ import stripe
 from ..serializers import (
     UserSerializer, TrackSerializer,
     PlaylistSerializer, AlbumSerializer,
-    DeletedPlaylistsSerializer)
+    DeletedPlaylistsSerializer, FollowersSerializer, FollowingSerializer)
 from ..models import (
     SubscriptionPlan, User_SubscriptionPlan, Track,
     LikedTrack, Playlist, LikedPlaylist, Album, LikedAlbum,
@@ -164,6 +165,38 @@ class UserDeletedPlaylistsDetails(views.APIView):
         obj.deleted_at = None
         obj.save()
         return Response({"message": "The Playlist Restored successfully !"})
+
+
+class UserFollower(generics.ListAPIView):
+    serializer_class = FollowersSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        if self.queryset:
+            return self.queryset
+        user_id = self.kwargs['id']
+        if not User.objects.filter(pk=user_id).exists():
+            raise Http404
+
+        self.queryset = Follower.objects.filter(
+            followed=user_id).prefetch_related('follower')
+        return self.queryset
+
+
+class UserFollowing(generics.ListAPIView):
+    serializer_class = FollowingSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        if self.queryset:
+            return self.queryset
+        user_id = self.kwargs['id']
+        if not User.objects.filter(pk=user_id).exists():
+            raise Http404
+
+        self.queryset = Follower.objects.filter(
+            follower=user_id).prefetch_related('followed')
+        return self.queryset
 
 
 @api_view(['POST'])

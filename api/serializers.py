@@ -8,7 +8,7 @@ from .models import *
 User = get_user_model()
 
 
-class FollowedSerializer(serializers.ModelSerializer):
+class FollowingSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(read_only=True, source='followed_id')
     user_name = serializers.SerializerMethodField(read_only=True)
     profile = serializers.SerializerMethodField()
@@ -25,7 +25,7 @@ class FollowedSerializer(serializers.ModelSerializer):
         return request.build_absolute_uri(reverse('get-user-profile', args=[obj.followed.id]))
 
 
-class FollowerSerializer(serializers.ModelSerializer):
+class FollowersSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(read_only=True, source='follower_id')
     user_name = serializers.SerializerMethodField(read_only=True)
     profile = serializers.SerializerMethodField()
@@ -35,7 +35,7 @@ class FollowerSerializer(serializers.ModelSerializer):
         fields = ['user_id', 'user_name', 'profile']
 
     def get_user_name(self, obj):
-        return obj.followed.first_name
+        return obj.follower.first_name
 
     def get_profile(self, obj):
         request = self.context['request']
