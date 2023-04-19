@@ -15,6 +15,9 @@ urlpatterns = [
          name='get-currentUser-deleted-playlists'),
     path('me/recover-playlists/<int:id>/', UserDeletedPlaylistsDetails.as_view(),
          name='recover-currentUser-deleted-playlist'),
+
+    path('<int:id>/follow/', user_follow, name='user_follow'),
+    path('<int:id>/unfollow/', user_unfollow, name='user_unfollow'),
     path('checkout/<int:plan_id>/', checkout, name='checkout'),
     path('upgrade/success/', success, name='success-view'),
     path('upgrade/cancel/', cancel, name='cancel-view'),

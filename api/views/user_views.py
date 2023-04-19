@@ -20,7 +20,9 @@ from ..serializers import (
     PlaylistSerializer, AlbumSerializer,
     DeletedPlaylistsSerializer)
 from ..models import (
-    SubscriptionPlan, User_SubscriptionPlan, Track, LikedTrack, Playlist, LikedPlaylist, Album, LikedAlbum)
+    SubscriptionPlan, User_SubscriptionPlan, Track,
+    LikedTrack, Playlist, LikedPlaylist, Album, LikedAlbum,
+    Follower,)
 
 User = get_user_model()
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -159,6 +161,35 @@ class UserDeletedPlaylistsDetails(views.APIView):
         obj.save()
         return Response({"message": "The Playlist Restored successfully !"})
 
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def user_follow(request, id):
+    user = User.objects.filter(pk=id)
+    if not user.exists():
+        return Response({"message": "can't found user with given id"}, status=404)
+
+    Follower.objects.create(
+        follower=request.user,
+        followed=user[0]
+    )
+
+    return Response({"message": "followed successfully"}, status=201)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def user_unfollow(request, id):
+    user = User.objects.filter(pk=id)
+    if not user.exists():
+        return Response({"message": "can't found user with given id"}, status=404)
+
+    obj = get_object_or_404(Follower, follower=request.user,
+                            followed=user[0])
+
+    obj.delete()
+
+    return Response({"message": "unfollowed successfully"}, status=204)
 
 
 @api_view(['GET'])
