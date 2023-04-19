@@ -165,13 +165,21 @@ class UserDeletedPlaylistsDetails(views.APIView):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def user_follow(request, id):
-    user = User.objects.filter(pk=id)
-    if not user.exists():
-        return Response({"message": "can't found user with given id"}, status=404)
+    user_to_follow = User.objects.filter(pk=id)
+
+    if not user_to_follow.exists():
+        return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    user_to_follow = user_to_follow[0]
+    if user_to_follow == request.user:
+        return Response({"detail": "You cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if request.user.following.filter(followed=user_to_follow).exists():
+        return Response({"detail": "You are already following this user."}, status=status.HTTP_400_BAD_REQUEST)
 
     Follower.objects.create(
         follower=request.user,
-        followed=user[0]
+        followed=user_to_follow
     )
 
     return Response({"message": "followed successfully"}, status=201)
@@ -180,14 +188,20 @@ def user_follow(request, id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def user_unfollow(request, id):
-    user = User.objects.filter(pk=id)
-    if not user.exists():
-        return Response({"message": "can't found user with given id"}, status=404)
+    user_to_unfollow = User.objects.filter(pk=id)
 
-    obj = get_object_or_404(Follower, follower=request.user,
-                            followed=user[0])
+    if not user_to_unfollow.exists():
+        return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
-    obj.delete()
+    user_to_unfollow = user_to_unfollow[0]
+    if user_to_unfollow == request.user:
+        return Response({"detail": "You cannot unfollow yourself."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not request.user.following.filter(followed=user_to_unfollow).exists():
+        return Response({"detail": "You are not following this user."}, status=status.HTTP_400_BAD_REQUEST)
+
+    Follower.objects.get(follower=request.user,
+                         followed=user_to_unfollow).delete()
 
     return Response({"message": "unfollowed successfully"}, status=204)
 
