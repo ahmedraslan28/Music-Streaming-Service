@@ -9,31 +9,46 @@ User = get_user_model()
 
 
 class FollowedSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField(read_only=True, source='followed')
+    user_id = serializers.IntegerField(read_only=True, source='followed_id')
     user_name = serializers.SerializerMethodField(read_only=True)
+    profile = serializers.SerializerMethodField()
 
     class Meta:
         model = Follower
-        fields = ['user_id', 'user_name']
-
-    # def get_user_id(self, obj):
-    #     return obj.followed
+        fields = ['user_id', 'user_name', 'profile']
 
     def get_user_name(self, obj):
         return obj.followed.first_name
 
+    def get_profile(self, obj):
+        request = self.context['request']
+        return request.build_absolute_uri(reverse('get-user-profile', args=[obj.followed.id]))
+
+
+class FollowerSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(read_only=True, source='follower_id')
+    user_name = serializers.SerializerMethodField(read_only=True)
+    profile = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Follower
+        fields = ['user_id', 'user_name', 'profile']
+
+    def get_user_name(self, obj):
+        return obj.followed.first_name
+
+    def get_profile(self, obj):
+        request = self.context['request']
+        return request.build_absolute_uri(reverse('get-user-profile', args=[obj.follower.id]))
+
 
 class UserSerializer(serializers.ModelSerializer):
-    # to add userplaylists and user followers and following and add following count
-    followers = FollowedSerializer(many=True, read_only=True)
-    following = FollowedSerializer(many=True, read_only=True)
-
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name',
                   'username', 'email', 'is_premium', 'is_male', 'is_active', 'is_artist', 'followers_count',
-                  'following_count', 'birth_date', 'profile_image', 'followers', 'following']
-        read_only_fields = ('is_premium', 'followers_count')
+                  'following_count', 'birth_date', 'profile_image']
+        read_only_fields = ('is_premium', 'followers_count', 'following_count')
         write_only_fields = ('birth_date')
 
 

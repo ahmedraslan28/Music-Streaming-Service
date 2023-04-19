@@ -31,7 +31,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 class UsersList(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
-    queryset = User.objects.filter(is_artist=False, is_active=True).all()
+    queryset = User.objects.filter(is_active=True)
     permission_classes = [IsAdminUser]
 
 
@@ -39,7 +39,7 @@ class UsersDetail(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
     serializer_class = UserSerializer
-    queryset = User.objects.filter(is_artist=False, is_active=True).all()
+    queryset = User.objects.filter(is_artist=False, is_active=True)
     lookup_field = 'id'
 
 
@@ -48,10 +48,14 @@ class UserProfile(generics.GenericAPIView):
 
     serializer_class = UserSerializer
 
+    def get_serializer_context(self):
+        return {"request": self.request}
+
     def get_queryset(self):
         if self.queryset is not None:
             return self.queryset
-        self.queryset = self.request.user
+        self.queryset = User.objects.filter(
+            pk=self.request.user.pk).prefetch_related('followers').prefetch_related('following')[0]
         return self.queryset
 
     def get(self, request):
@@ -166,21 +170,26 @@ class UserDeletedPlaylistsDetails(views.APIView):
 @permission_classes([IsAuthenticated])
 def user_follow(request, id):
     user_to_follow = User.objects.filter(pk=id)
+    user = request.user
 
     if not user_to_follow.exists():
         return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
     user_to_follow = user_to_follow[0]
-    if user_to_follow == request.user:
+    if user_to_follow == user:
         return Response({"detail": "You cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
 
-    if request.user.following.filter(followed=user_to_follow).exists():
+    if user.following.filter(followed=user_to_follow).exists():
         return Response({"detail": "You are already following this user."}, status=status.HTTP_400_BAD_REQUEST)
 
     Follower.objects.create(
-        follower=request.user,
+        follower=user,
         followed=user_to_follow
     )
+    user.following_count += 1
+    user_to_follow.followers_count += 1
+    user.save()
+    user_to_follow.save()
 
     return Response({"message": "followed successfully"}, status=201)
 
@@ -189,19 +198,24 @@ def user_follow(request, id):
 @permission_classes([IsAuthenticated])
 def user_unfollow(request, id):
     user_to_unfollow = User.objects.filter(pk=id)
-
+    user = request.user
     if not user_to_unfollow.exists():
         return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
     user_to_unfollow = user_to_unfollow[0]
-    if user_to_unfollow == request.user:
+    if user_to_unfollow == user:
         return Response({"detail": "You cannot unfollow yourself."}, status=status.HTTP_400_BAD_REQUEST)
 
-    if not request.user.following.filter(followed=user_to_unfollow).exists():
+    if not user.following.filter(followed=user_to_unfollow).exists():
         return Response({"detail": "You are not following this user."}, status=status.HTTP_400_BAD_REQUEST)
 
-    Follower.objects.get(follower=request.user,
+    Follower.objects.get(follower=user,
                          followed=user_to_unfollow).delete()
+
+    user.following_count -= 1
+    user_to_unfollow.followers_count -= 1
+    user.save()
+    user_to_unfollow.save()
 
     return Response({"message": "unfollowed successfully"}, status=204)
 
