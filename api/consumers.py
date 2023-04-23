@@ -1,18 +1,18 @@
-from channels.generic.websocket import WebsocketConsumer
-from asgiref.sync import async_to_sync
+from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 
 
-class NotificationConsumer(WebsocketConsumer):
+class NotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.id = self.scope['url_route']['kwargs']['id']
+        self.reciever_id = self.scope['url_route']['kwargs']['reciever_id']
+        self.group_name = f"{self.reciever_id}"
+        await self.channel_layer.group_add(
+            self.group_name, self.channel_name
+        )
+        await self.accept()
+        await self.send("succeffuly connected")
 
-    def connect(self):
-        self.accept()
-        self.username = "Raslan"
-        self.send(text_data="[Welcome %s!]" % self.username)
-
-    def receive(self, *, text_data):
-        print(text_data)
-        # self.send(text_data=self.username + ": " + text_data)
-
-    def disconnect(self, message):
-        print('closed')
+    async def send_follow_notification(self, event):
+        data = json.dumps(event)
+        await self.send(text_data=data)

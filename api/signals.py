@@ -1,8 +1,10 @@
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
-from api.models import Artist, Track, Album
+from api.models import Artist, Track, Album, Follower
 
 from mutagen.mp3 import MP3
 
@@ -29,3 +31,18 @@ def add_duration_for_new_track_and_for_album(sender, created, instance, **kwargs
             album.song_count += 1
             album.duration += instance.duration
             album.save()
+
+
+@receiver(post_save, sender=Follower)
+def send_notification_on_follow(sender, created, instance, **kwargs):
+    if created:
+        sender = instance.follower
+        receiver = instance.followed
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"{receiver.id}",
+            {
+                "type": "send.follow.notification",
+                "message": f"{sender.username} started following {receiver.username}."
+            }
+        )
