@@ -6,6 +6,7 @@ from ..views.user_views import *
 urlpatterns = [
     path('', UsersList.as_view(), name='get-all-users'),
     path('<int:id>/', UsersDetail.as_view(), name='get-user-profile'),
+    path('<int:id>/playlists/', UsersPlaylists.as_view(), name='user_playlists'),
     path('<int:id>/followers/', UserFollower.as_view(), name='get-user-followers'),
     path('<int:id>/following/', UserFollowing.as_view(), name='get-user-following'),
     path('<int:id>/follow/', user_follow, name='user_follow'),

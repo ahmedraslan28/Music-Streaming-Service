@@ -44,6 +44,17 @@ class UsersDetail(generics.RetrieveAPIView):
     lookup_field = 'id'
 
 
+class UsersPlaylists(generics.ListAPIView):
+    serializer_class = PlaylistSerializer
+
+    def get_queryset(self):
+        if self.queryset:
+            return self.queryset
+        get_object_or_404(Playlist, user=self.kwargs['id'])
+        self.queryset = Playlist.objects.filter(user=self.kwargs['id'])
+        return self.queryset
+
+
 class UserProfile(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
