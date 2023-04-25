@@ -29,7 +29,12 @@ class IsDeleteRequest(permissions.BasePermission):
 
 class IsArtist(permissions.BasePermission):
     def has_permission(self, request, view):
-        return bool(request.user and request.user.is_artist)
+        return request.user and request.user.is_authenticated and request.user.is_artist
+
+
+class IsPremium(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated and request.user.is_premium
 
 
 class IsPlaylistOwner(permissions.BasePermission):
@@ -43,9 +48,13 @@ class IsOwner(permissions.BasePermission):
         return obj and self.has_object_permission(request, view, obj)
 
     def has_object_permission(self, request, view, obj):
-        return request.user.is_artist and obj.artist.user == request.user
+        return (request.user.is_authenticated
+                and request.user.is_artist
+                and obj.artist.user == request.user)
 
 
 class IsArtistProfile(permissions.BasePermission):
     def has_object_permission(self, request, view, obj: Artist):
-        return request.user.is_artist and obj.user == request.user
+        return (request.user.is_authenticated and
+                request.user.is_artist and
+                obj.user == request.user)

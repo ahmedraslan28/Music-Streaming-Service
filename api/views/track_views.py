@@ -1,9 +1,15 @@
+import os
+import mimetypes
+
+from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.conf import settings
 
 
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view, permission_classes
 
 from ..models import Track, LikedTrack
 from ..serializers import TrackSerializer, TrackUpdateSerializer, LikedTracksSerializer
@@ -77,3 +83,17 @@ class TrackLikes(APIView):
             message = "The track has been liked successfully"
 
         return Response({"message": message}, status=200)
+
+
+@api_view(['GET'])
+@permission_classes([IsPremium])
+def track_download(request, id):
+    track = get_object_or_404(Track, pk=id)
+    BASE_DIR = settings.MEDIA_ROOT
+    filename = track.audio_file.name.split('/')[1]
+    filepath = BASE_DIR + '/tracks/' + filename
+    path = open(filepath, 'rb')
+    mime_type, _ = mimetypes.guess_type(filepath)
+    response = HttpResponse(path, content_type=mime_type)
+    response['Content-Disposition'] = "attachment; filename=%s" % filename
+    return response

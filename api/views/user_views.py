@@ -40,7 +40,7 @@ class UsersDetail(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
     serializer_class = UserSerializer
-    queryset = User.objects.filter(is_artist=False, is_active=True)
+    queryset = User.objects.filter(is_active=True)
     lookup_field = 'id'
 
 

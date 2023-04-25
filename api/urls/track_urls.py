@@ -5,4 +5,5 @@ urlpatterns = [
     path('', TrackList.as_view(), name='track_list'),
     path('<int:id>/', TrackDetail.as_view(), name='track_details'),
     path('<int:id>/likes/', TrackLikes.as_view(), name='track_likes'),
+    path('<int:id>/download/', track_download, name='track_download'),
 ]
