@@ -27,7 +27,16 @@ class PlaylistList(generics.ListCreateAPIView):
         return PlaylistSerializer
 
     def post(self, request, *args, **kwargs):
-        context = {"user": self.request.user}
+        user = self.request.user
+        context = {"user": user}
+
+        if (not user.is_premium
+                and
+                Playlist.objects.filter(user=self.request.user).count() == 7
+            ):
+            return Response({"message": """Sorry, you have reached the limit for creating playlists as a free user. upgrade to a paid plan to create more playlists."""},
+                            status=status.HTTP_429_TOO_MANY_REQUESTS)
+
         data = request.data
         serializer = self.get_serializer(data=data, context=context)
         serializer.is_valid(raise_exception=True)
