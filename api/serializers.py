@@ -277,8 +277,6 @@ class ArtistSerializer(serializers.ModelSerializer):
         lookup_field='id'
     )
     user = UserSerializer(read_only=True)
-    # tracks = TrackSerializer(many=True, read_only=True)
-    # albums = AlbumSerializer(many=True, read_only=True)
 
     class Meta:
         model = Artist
@@ -322,3 +320,52 @@ class DeletedPlaylistsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Playlist
         fields = ['id', 'deleted_at', 'name', 'song_count']
+
+
+class TracksHyperLinkSerializer(serializers.HyperlinkedModelSerializer):
+    track = serializers.HyperlinkedIdentityField(
+        view_name='track_details', lookup_field='id')
+
+    class Meta:
+        model = Track
+        fields = ['track']
+
+
+class PlaylistsHyperLinkSerializer(serializers.HyperlinkedModelSerializer):
+    playlist = serializers.HyperlinkedIdentityField(
+        view_name='playlist_details', lookup_field='id')
+
+    class Meta:
+        model = Playlist
+        fields = ['playlist']
+
+
+class UsersHyperLinkSerializer(serializers.HyperlinkedModelSerializer):
+    user = serializers.HyperlinkedIdentityField(
+        view_name='get-user-profile', lookup_field='id')
+
+    class Meta:
+        model = User
+        fields = ['user']
+
+
+class AlbumsHyperLinkSerializer(serializers.HyperlinkedModelSerializer):
+    album = serializers.HyperlinkedIdentityField(
+        view_name='album_detail', lookup_field='id')
+
+    class Meta:
+        model = Album
+        fields = ['album']
+
+
+class ArtistsHyperLinkSerializer(serializers.HyperlinkedModelSerializer):
+    artist = serializers.HyperlinkedIdentityField(
+        view_name='artist-details', lookup_url_kwarg='id')
+
+    class Meta:
+        model = Artist
+        fields = ['artist']
+
+    def get_artist(self, obj):
+        url_kwargs = {'id': obj.user.id}
+        return self.context['request'].build_absolute_uri(reverse('artist-details', kwargs=url_kwargs))
