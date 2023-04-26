@@ -9,6 +9,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
 from django.views.decorators.csrf import csrf_exempt
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 from rest_framework import generics, status, views
@@ -28,6 +29,7 @@ from ..models import (
     SubscriptionPlan, User_SubscriptionPlan, Track,
     LikedTrack, Playlist, LikedPlaylist, Album, LikedAlbum,
     Follower,)
+from ..filters import *
 
 User = get_user_model()
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -38,6 +40,9 @@ class UsersList(generics.ListAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.filter(is_active=True)
     permission_classes = [IsAdminUser]
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = UserFilter
 
 
 class UsersDetail(generics.RetrieveAPIView):

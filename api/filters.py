@@ -27,3 +27,12 @@ class TrackFilter(FilterSet):
             'id': ['in',],
             'release_date': ['gt', 'lt']
         }
+
+
+class UserFilter(FilterSet):
+    class Meta:
+        model = User
+        fields = {
+            'id': ['in',],
+            'is_artist': ['exact']
+        }
