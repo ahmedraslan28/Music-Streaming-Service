@@ -1,9 +1,13 @@
+from base64 import urlsafe_b64encode
 from django.conf import settings
 from django.http import Http404
 from django.utils import timezone
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth import get_user_model
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth.tokens import default_token_generator
 from django.views.decorators.csrf import csrf_exempt
 
 
@@ -267,10 +271,16 @@ def user_unfollow(request, id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def checkout(request, plan_id):
-    if request.user.is_premium:
+    user = request.user
+    if user.is_premium:
         return Response({"message": "your are already a premium user"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
     try:
         plan = get_object_or_404(SubscriptionPlan, pk=plan_id)
+        user_plan_id = f"{user.id}:{plan.id}"
+        uid = urlsafe_base64_encode(force_bytes(user_plan_id))
+        # uid = urlsafe_b64encode(force_bytes(user_plan_id)).decode('utf-8')
+        token = default_token_generator.make_token(user)
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[
@@ -290,7 +300,7 @@ def checkout(request, plan_id):
                 "plan": plan.id
             },
             mode='payment',
-            success_url='http://127.0.0.1:8000/api/users/upgrade/success/',
+            success_url=f'http://127.0.0.1:8000/api/users/upgrade/{uid}/{token}/success/',
             cancel_url='http://127.0.0.1:8000/api/users/upgrade/cancel/',
         )
     except Exception as e:
@@ -301,8 +311,24 @@ def checkout(request, plan_id):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def success(request):
-    return Response({"message": "congratulations your account upgraded successfuly"}, status=200)
+def success(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user_id, plan_id = uid.split(':')
+        user = User.objects.get(pk=user_id)
+        plan = SubscriptionPlan.objects.get(pk=plan_id)
+
+        if default_token_generator.check_token(user, token):
+            user.is_premium = True
+            user.save()
+            end_date = timezone.now() + timezone.timedelta(days=30)
+            User_SubscriptionPlan.objects.create(
+                user_id=user_id, plan_id=plan_id, end_date=end_date)
+            return Response({"success": "congratulations your account upgraded successfuly"}, status=200)
+        return Response({'error': 'Invalid URL.'}, status=400)
+
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist, SubscriptionPlan.DoesNotExist):
+        return Response({'error': 'Invalid URL.'}, status=400)
 
 
 @api_view(['GET'])

@@ -22,7 +22,7 @@ urlpatterns = [
          name='recover-currentUser-deleted-playlist'),
 
     path('checkout/<int:plan_id>/', checkout, name='checkout'),
-    path('upgrade/success/', success, name='success-view'),
+    path('upgrade/<uidb64>/<token>/success/', success, name='success-view'),
     path('upgrade/cancel/', cancel, name='cancel-view'),
     path('stripe-webhook/', stripe_webhook, name='stripe-webhook'),
 ]
