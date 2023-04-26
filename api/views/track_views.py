@@ -1,9 +1,9 @@
-import os
 import mimetypes
 
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.conf import settings
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 from rest_framework import generics
@@ -14,10 +14,13 @@ from rest_framework.decorators import api_view, permission_classes
 from ..models import Track, LikedTrack
 from ..serializers import TrackSerializer, TrackUpdateSerializer, LikedTracksSerializer
 from ..permissions import *
+from ..filters import *
 
 
 class TrackList(generics.ListCreateAPIView):
     permission_classes = [IsReadyOnlyRequest | IsArtist]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TrackFilter
 
     serializer_class = TrackSerializer
     queryset = Track.objects.all()

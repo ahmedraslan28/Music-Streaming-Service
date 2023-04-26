@@ -18,3 +18,12 @@ class PlalistFilter(FilterSet):
             'id': ['in',],
             'created_at': ['gt', 'lt']
         }
+
+
+class TrackFilter(FilterSet):
+    class Meta:
+        model = Track
+        fields = {
+            'id': ['in',],
+            'release_date': ['gt', 'lt']
+        }
