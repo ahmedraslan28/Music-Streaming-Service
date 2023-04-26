@@ -1,5 +1,6 @@
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 from rest_framework import generics, status
@@ -12,11 +13,14 @@ from ..serializers import (
     AlbumTrackSerializer, TrackUpdateSerializer, LikedAlbumsSerializer)
 from ..models import Album, Track, LikedAlbum
 from ..permissions import *
+from ..filters import *
 
 
 class AlbumList(generics.ListCreateAPIView):
 
     permission_classes = [IsReadyOnlyRequest | IsArtist]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = AlbumFilter
 
     serializer_class = AlbumSerializer
     queryset = Album.objects.prefetch_related('tracks').all()
