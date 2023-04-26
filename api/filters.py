@@ -9,3 +9,11 @@ class AlbumFilter(FilterSet):
             'id': ['in',],
             'release_date': ['gt', 'lt']
         }
+
+
+class ArtistFilter(FilterSet):
+    class Meta:
+        model = Artist
+        fields = {
+            'id': ['in',],
+        }

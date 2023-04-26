@@ -1,5 +1,6 @@
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import generics, permissions
 from rest_framework.response import Response
@@ -9,6 +10,7 @@ from ..serializers import (
     TrackSerializer, TrackUpdateSerializer, AlbumSerializer)
 from ..models import Artist, Track, Album
 from ..permissions import *
+from ..filters import *
 
 
 class ArtistList(generics.ListAPIView):
@@ -18,6 +20,8 @@ class ArtistList(generics.ListAPIView):
                       .prefetch_related('tracks')
                       .prefetch_related('albums')
                       .filter(user__is_artist=True))
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = AlbumFilter
 
 
 class ArtistDetails(generics.GenericAPIView):
