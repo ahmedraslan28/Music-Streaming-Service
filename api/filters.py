@@ -1,4 +1,4 @@
-from django_filters import FilterSet
+from django_filters import FilterSet, rest_framework as filters
 from .models import *
 
 
@@ -11,9 +11,10 @@ class AlbumFilter(FilterSet):
         }
 
 
-class ArtistFilter(FilterSet):
+class PlalistFilter(FilterSet):
     class Meta:
-        model = Artist
+        model = Playlist
         fields = {
             'id': ['in',],
+            'created_at': ['gt', 'lt']
         }

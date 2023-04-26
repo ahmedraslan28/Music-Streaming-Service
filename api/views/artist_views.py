@@ -20,8 +20,6 @@ class ArtistList(generics.ListAPIView):
                       .prefetch_related('tracks')
                       .prefetch_related('albums')
                       .filter(user__is_artist=True))
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = AlbumFilter
 
 
 class ArtistDetails(generics.GenericAPIView):

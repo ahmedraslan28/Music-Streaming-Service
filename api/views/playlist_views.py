@@ -1,6 +1,7 @@
 from django.http import Http404
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
@@ -13,10 +14,13 @@ from ..serializers import (PlaylistSerializer,
                            LikedPlaylistsSerializer)
 from ..models import Playlist, Track, LikedPlaylist
 from ..permissions import *
+from ..filters import *
 
 
 class PlaylistList(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = PlalistFilter
 
     queryset = Playlist.objects.prefetch_related(
         'tracks').all().filter(is_deleted=False)
@@ -31,9 +35,9 @@ class PlaylistList(generics.ListCreateAPIView):
         context = {"user": user}
 
         if (not user.is_premium
-                and
-                Playlist.objects.filter(user=self.request.user).count() == 7
-            ):
+                    and
+                    Playlist.objects.filter(user=self.request.user).count() == 7
+                ):
             return Response({"message": """Sorry, you have reached the limit for creating playlists as a free user. upgrade to a paid plan to create more playlists."""},
                             status=status.HTTP_429_TOO_MANY_REQUESTS)
 
