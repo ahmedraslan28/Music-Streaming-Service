@@ -30,6 +30,7 @@ from ..models import (
     LikedTrack, Playlist, LikedPlaylist, Album, LikedAlbum,
     Follower,)
 from ..filters import *
+from ..tasks import sending_emails
 
 User = get_user_model()
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -373,3 +374,9 @@ def stripe_webhook(request):
             user_id=user_id, plan_id=plan_id, end_date=end_date)
 
     return Response(status=200)
+
+
+@api_view(['GET'])
+def say_hello(request):
+    sending_emails.delay('hi from ahmed')
+    return Response("hello")

@@ -15,6 +15,9 @@ pydub = "*"
 rest-condition = "*"
 channels = {extras = ["daphne"], version = "*"}
 django-filter = "*"
+redis = "*"
+celery = "==4.4.2"
+eventlet = "*"
 
 [dev-packages]
 autopep8 = "*"

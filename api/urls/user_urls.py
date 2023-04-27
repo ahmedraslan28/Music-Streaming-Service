@@ -25,4 +25,5 @@ urlpatterns = [
     path('upgrade/<uidb64>/<token>/success/', success, name='success-view'),
     path('upgrade/cancel/', cancel, name='cancel-view'),
     path('stripe-webhook/', stripe_webhook, name='stripe-webhook'),
+    path('hello/', say_hello, name='hello'),
 ]
