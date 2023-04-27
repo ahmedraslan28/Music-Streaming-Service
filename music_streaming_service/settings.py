@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+from celery.schedules import crontab
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -42,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "debug_toolbar",
     'rest_framework',
+    'celery',
+    'django_celery_beat',
     'api.apps.ApiConfig',
     'auth.apps.AuthConfig',
     'channels',
@@ -178,3 +181,13 @@ PRODUCT_KEY = 'prod_Nf18qFalCAhRFb'
 STRIPE_WEBHOOK_KEY = 'whsec_efa5aa7746760b7f421d3000195b53e06b15ad3c8d28f348bc1385ddb81fdef3'
 
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+CELERY_BEAT_SCHEDULE = {
+    'delete_old_playlists': {
+        'task': 'api.tasks.delete_old_playlists',
+        'schedule': crontab(hour="*/24"),
+    },
+    'check_expired_subscription': {
+        'task': 'api.tasks.check_expired_subscription',
+        'schedule': crontab(hour="*/24"),
+    }
+}

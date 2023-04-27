@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from base64 import urlsafe_b64encode
 from django.conf import settings
 from django.http import Http404
@@ -30,7 +31,6 @@ from ..models import (
     LikedTrack, Playlist, LikedPlaylist, Album, LikedAlbum,
     Follower,)
 from ..filters import *
-from ..tasks import sending_emails
 
 User = get_user_model()
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -378,5 +378,9 @@ def stripe_webhook(request):
 
 @api_view(['GET'])
 def say_hello(request):
-    sending_emails.delay('hi from ahmed')
-    return Response("hello")
+    expired_subscriptions = User_SubscriptionPlan.objects.filter(
+        end_date__lt=timezone.now())
+    user_ids = expired_subscriptions.values_list('user_id', flat=True)
+    User.objects.filter(id__in=user_ids).update(is_premium=False)
+    data = list(expired_subscriptions.values())
+    return JsonResponse(data, safe=False)

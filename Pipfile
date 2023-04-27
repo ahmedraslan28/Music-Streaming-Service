@@ -18,6 +18,7 @@ django-filter = "*"
 redis = "*"
 celery = "==4.4.2"
 eventlet = "*"
+django-celery-beat = "*"
 
 [dev-packages]
 autopep8 = "*"
