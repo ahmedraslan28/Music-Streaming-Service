@@ -1,7 +1,5 @@
-from django.http import JsonResponse
-from base64 import urlsafe_b64encode
+from django.http import JsonResponse, Http404
 from django.conf import settings
-from django.http import Http404
 from django.utils import timezone
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
@@ -17,7 +15,6 @@ from rest_framework import generics, status, views
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
-from rest_framework import status
 
 
 import stripe
