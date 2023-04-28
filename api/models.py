@@ -58,7 +58,7 @@ class LikedAlbum(models.Model):
     created_at = models.DateField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return self.user.name
+        return self.user.first_name
 
 
 class Track(models.Model):
