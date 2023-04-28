@@ -19,6 +19,7 @@ redis = "*"
 celery = "==4.4.2"
 eventlet = "*"
 django-celery-beat = "*"
+drf-yasg = "*"
 
 [dev-packages]
 autopep8 = "*"

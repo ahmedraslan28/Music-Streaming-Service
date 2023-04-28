@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'auth.apps.AuthConfig',
     'channels',
     'django_filters',
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [
