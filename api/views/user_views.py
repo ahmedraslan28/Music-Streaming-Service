@@ -34,7 +34,6 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 class UsersList(generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
     queryset = User.objects.filter(is_active=True)
     permission_classes = [IsAdminUser]
@@ -57,7 +56,7 @@ class UsersPlaylists(generics.ListAPIView):
     def get_queryset(self):
         if self.queryset:
             return self.queryset
-        get_object_or_404(Playlist, user=self.kwargs['id'])
+        get_object_or_404(User, pk=self.kwargs['id'])
         self.queryset = Playlist.objects.filter(user=self.kwargs['id'])
         return self.queryset
 
