@@ -12,6 +12,8 @@ class SubscriptionPlanList(generics.ListCreateAPIView):
 
 
 class SubscriptionPlanDetails(generics.RetrieveUpdateDestroyAPIView):
+    http_method_names = ['get', 'head', 'options', 'patch', 'delete']
+
     permission_classes = [permissions.IsAdminUser | IsReadyOnlyRequest]
     serializer_class = SubscriptionPlanSerializer
     queryset = SubscriptionPlan.objects.all()

@@ -56,6 +56,10 @@ class AlbumDetail(generics.RetrieveUpdateDestroyAPIView):
         serializer = AlbumSerializer(obj)
         return Response(serializer.data)
 
+    def delete(self, request, *args, **kwargs):
+        self.get_queryset()[0].delete()
+        return Response({'message': 'Album deleted successfully!'}, status=204)
+
 
 class AlbumTracks(generics.ListCreateAPIView):
     permission_classes = [IsReadyOnlyRequest | IsOwner]
@@ -107,14 +111,6 @@ class AlbumTrackDetail(generics.GenericAPIView):
     def get(self,  request, album_id, track_id,):
         track = self.get_queryset()[0]
         serializer = self.get_serializer(track)
-        return Response(serializer.data)
-
-    def patch(self,  request, album_id, track_id,):
-        track = self.get_queryset()[0]
-        serializer = self.get_serializer(track, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        serializer = TrackSerializer(track)
         return Response(serializer.data)
 
     def delete(self, request, album_id, track_id):

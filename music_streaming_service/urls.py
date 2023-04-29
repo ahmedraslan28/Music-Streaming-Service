@@ -47,7 +47,7 @@ urlpatterns = [
     path('api/subscription_plans/', include('api.urls.subscription_plans_urls')),
     path('api/artists/', include('api.urls.artist_urls')),
     path('api/search/', include('api.urls.search_urls')),
-
+    path('api-auth/', include('rest_framework.urls')),
 
     path('swagger.json/',
          schema_view.without_ui(cache_timeout=0), name='schema-json'),

@@ -26,6 +26,7 @@ class CategoryList(generics.ListCreateAPIView):
 
 
 class CategoryDetails(generics.RetrieveUpdateDestroyAPIView):
+    http_method_names = ['head', 'options', 'get', 'patch', 'delete']
     permission_classes = [IsReadyOnlyRequest | permissions.IsAdminUser]
     serializer_class = CategorySerializer
     queryset = Category.objects.prefetch_related(

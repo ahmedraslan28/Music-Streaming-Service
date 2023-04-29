@@ -32,6 +32,8 @@ class TrackList(generics.ListCreateAPIView):
 class TrackDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsReadyOnlyRequest | IsOwner]
 
+    http_method_names = ['head', 'options', 'get', 'patch', 'delete']
+
     def get_serializer_context(self):
         return {"user": self.request.user, "request": self.request}
 

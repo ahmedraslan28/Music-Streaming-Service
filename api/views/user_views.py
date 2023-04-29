@@ -139,6 +139,7 @@ class UserSavedAlbums(generics.GenericAPIView):
             return self.queryset
         liked_albums = LikedAlbum.objects.filter(user=self.request.user)
         album_ids = liked_albums.values_list('album_id', flat=True)
+        print(album_ids)
         self.queryset = Album.objects.filter(id__in=album_ids)
 
         return self.queryset
@@ -267,7 +268,7 @@ def user_unfollow(request, id):
     user.save()
     user_to_unfollow.save()
 
-    return Response({"message": "unfollowed successfully"}, status=204)
+    return Response({"message": "unfollowed successfully"}, status=200)
 
 
 @api_view(['GET'])

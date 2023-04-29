@@ -181,8 +181,7 @@ class ArtistAlbumsDetails(generics.GenericAPIView):
         if artist_id == 'me':
             artist_id = self.request.user.id
 
-        if not Album.objects.filter(pk=album_id, artist_id=artist_id).exists():
-            raise Http404
+        get_object_or_404(Album, pk=album_id, artist_id=artist_id)
 
         self.queryset = Album.objects.prefetch_related(
             'tracks').filter(pk=album_id, artist_id=artist_id)
@@ -202,5 +201,6 @@ class ArtistAlbumsDetails(generics.GenericAPIView):
         return Response(serializer.data)
 
     def delete(self, request, artist_id, album_id):
-        self.get_queryset()[0].delete()
+        obj = self.get_queryset()[0]
+        obj.delete()
         return Response({"message": "deleted successfully"}, status=204)
