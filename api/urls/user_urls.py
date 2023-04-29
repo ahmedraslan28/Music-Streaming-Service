@@ -21,6 +21,9 @@ urlpatterns = [
     path('me/recover-playlists/<int:id>/', UserDeletedPlaylistsDetails.as_view(),
          name='recover-currentUser-deleted-playlist'),
 
+    path('me/notifications/', UserNotifications.as_view(),
+         name='user-notifications'),
+
     path('checkout/<int:plan_id>/', checkout, name='checkout'),
     path('upgrade/<uidb64>/<token>/success/', success, name='success-view'),
     path('upgrade/cancel/', cancel, name='cancel-view'),

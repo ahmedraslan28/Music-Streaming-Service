@@ -22,7 +22,8 @@ import stripe
 from ..serializers import (
     UserSerializer, TrackSerializer,
     PlaylistSerializer, AlbumSerializer,
-    DeletedPlaylistsSerializer, FollowersSerializer, FollowingSerializer)
+    DeletedPlaylistsSerializer, FollowersSerializer,
+    FollowingSerializer, NotificationSerializer)
 from ..models import (
     SubscriptionPlan, User_SubscriptionPlan, Track,
     LikedTrack, Playlist, LikedPlaylist, Album, LikedAlbum,
@@ -242,6 +243,11 @@ def user_follow(request, id):
     user.save()
     user_to_follow.save()
 
+    Notification.objects.create(
+        reciever=user_to_follow,
+        message=f'{user.first_name} followed {user_to_follow.first_name}'
+    )
+
     return Response({"message": "followed successfully"}, status=201)
 
 
@@ -282,7 +288,6 @@ def checkout(request, plan_id):
         plan = get_object_or_404(SubscriptionPlan, pk=plan_id)
         user_plan_id = f"{user.id}:{plan.id}"
         uid = urlsafe_base64_encode(force_bytes(user_plan_id))
-        # uid = urlsafe_b64encode(force_bytes(user_plan_id)).decode('utf-8')
         token = default_token_generator.make_token(user)
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
@@ -371,6 +376,17 @@ def stripe_webhook(request):
             user_id=user_id, plan_id=plan_id, end_date=end_date)
 
     return Response(status=200)
+
+
+class UserNotifications(generics.ListAPIView):
+    serializer_class = NotificationSerializer
+
+    def get_queryset(self):
+        if self.queryset:
+            return self.queryset
+        self.queryset = Notification.objects.filter(reciever=self.request.user)
+
+        return self.queryset
 
 
 @api_view(['GET'])

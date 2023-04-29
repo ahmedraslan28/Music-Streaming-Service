@@ -369,3 +369,9 @@ class ArtistsHyperLinkSerializer(serializers.HyperlinkedModelSerializer):
     def get_artist(self, obj):
         url_kwargs = {'id': obj.user.id}
         return self.context['request'].build_absolute_uri(reverse('artist-details', kwargs=url_kwargs))
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'message', 'created_at']
