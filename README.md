@@ -11,12 +11,12 @@ This is a REST API backend for a Spotify clone app that manages users, artists, 
 
 - Authentication and authorization
 - Forget your password ? can reset it by just a click
-- User registration and password reset functionality
 - Mailing service, get confirmation mail whenever you
   - Sign up
   - Froget you password
 - handling payment using stripe
 - Privileges for premium users
+- run backgroud tasks using celery
 - create your own playlist with only the best songs you like
 - Dreamed of being an artist then be one and upload your songs and create your albums.
 - Follow your favourite users and artists and be notified whenever the upload something or create albums and playlists
