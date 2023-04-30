@@ -16,7 +16,7 @@ This is a REST API backend for a Spotify clone app that manages users, artists, 
   - Froget you password
 - handling payment using stripe
 - Privileges for premium users
-- run backgroud tasks using celery
+- run background tasks using celery
 - create your own playlist with only the best songs you like
 - Dreamed of being an artist then be one and upload your songs and create your albums.
 - Follow your favourite users and artists and be notified whenever the upload something or create albums and playlists
@@ -29,3 +29,10 @@ This is a REST API backend for a Spotify clone app that manages users, artists, 
 - save your favourite tracks, albums and playlists in your library
 - Search for your beloved track/artist/user/albums/playlist
 - Deleted a playlist by mistake ? Don't worry you can always recover it within 90 days from your recently deleted playlist
+
+## Technologies Used
+
+- Django
+- Django REST Framework
+- Djagno channels
+- Celery
