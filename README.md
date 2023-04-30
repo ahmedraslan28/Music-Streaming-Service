@@ -1,7 +1,7 @@
 # Music-Streaming-Service
 
 This is the complete backend project for Music-Streaming-Service, a Music-Streaming-Service.
-It mimics the complete Spotify or any Music-Streaming-Service API behaviour.
+It mimics the complete Spotify or any Music-Streaming-Service API behavior.
 
 ## About
 
