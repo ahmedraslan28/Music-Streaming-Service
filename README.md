@@ -19,7 +19,7 @@ This is a REST API backend for a Spotify clone app that manages users, artists, 
 - run background tasks using celery
 - create your own playlist with only the best songs you like
 - Dreamed of being an artist then be one and upload your songs and create your albums.
-- Follow your favourite users and artists and be notified whenever the upload something or create albums and playlists
+- Follow your favourite users and artists and be notified whenever they upload something or create albums and playlists
 - Get real-time notifications whenever
   - artist you follow uploaded a new album/track
   - some user followed you
