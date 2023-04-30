@@ -20,6 +20,8 @@ celery = "==4.4.2"
 eventlet = "*"
 django-celery-beat = "*"
 drf-yasg = "*"
+django-seed = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 autopep8 = "*"

@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     'auth.apps.AuthConfig',
     'channels',
     'django_filters',
-    'drf_yasg'
+    'drf_yasg',
+    'django_seed',
 ]
 
 MIDDLEWARE = [
@@ -130,8 +131,8 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10
 }
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=5),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=90),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=100),
 }
 
 INTERNAL_IPS = [
