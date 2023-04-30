@@ -36,3 +36,12 @@ This is a REST API backend for a Spotify clone app that manages users, artists, 
 - Django REST Framework
 - Djagno channels
 - Celery
+
+## Prerequisities
+
+To be able to run the project successfully you need to have the following installed on your machine:
+
+1. python
+2. pipenv
+
+You can install pipenv using this command `pip install pipenv`
