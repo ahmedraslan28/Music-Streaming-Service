@@ -77,16 +77,21 @@ view it online: [DB Model](https://drawsql.app/teams/raslan-2/diagrams/music-str
 
 ## For Testers
 
-When you use the seeds 'python manage.py seed_db' the following you can use the following users to test:
-| Email | Password | Type |
-| ----------------- | ----------- | --------------------------------------- |
-| free_user@example.com | user | free user |
-| premium_user@example.com | user | premium user |
-| admin@example.com | admin | admin user |
-| artist@example.com | artist | artist |
+When you seed the db using `python manage.py seed_db` you can use the following users to test:
 
+| Email                    | Password | Type         |
+| ------------------------ | -------- | ------------ |
+| free_user@example.com    | user     | free user    |
+| premium_user@example.com | user     | premium user |
+| admin@example.com        | admin    | admin user   |
+| artist@example.com       | artist   | artist       |
+
+<pr>
+<pr>
 when testing payment you can use this fake card data :-
 
-Credit Card numter : 4111111111111111
-Card Expiration : any future date
-CVC : any 3 digits
+- `Credit Card numter` : 4111111111111111
+
+- `Card Expiration` : any future date
+
+- `CVC` : any 3 digits
