@@ -11,6 +11,7 @@ from mutagen.mp3 import MP3
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_artist_for_new_user(sender, instance, **kwargs):
+    print("i'm here")
     try:
         artist = instance.artist
     except Artist.DoesNotExist:
