@@ -1,11 +1,10 @@
 # Music-Streaming-Service
 
-This is the complete backend project for Music-Streaming-Service, a Music-Streaming-Service.
-It mimics the complete Spotify or any Music-Streaming-Service API behavior.
+This is the complete backend project for Music-Streaming-Service .
 
 ## About
 
-This is a REST API backend for a Spotify clone app that manages users, artists, albums, playlists, tracks, and premium subscriptions. The app also integrates with Stripe to process payments for premium subscriptions.
+This is the complete backend for a Music Streaming Service, designed to replicate the functionality of Spotify or similar platforms. It provides a RESTful API to manage users, artists, albums, playlists, tracks, and premium subscriptions. Additionally, the service integrates with Stripe to handle secure payment processing for premium subscriptions and utilizes WebSockets for real-time notifications.
 
 ## Features
 
